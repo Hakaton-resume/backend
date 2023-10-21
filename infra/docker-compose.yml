@@ -1,0 +1,22 @@
+version: '3.3'
+services:
+
+  db:
+    image: postgres:13-alpine
+    env_file:
+      - ./.env
+    volumes:
+      - db_value:/var/lib/postgresql/data/
+
+  career_tracker_hr:
+    build: ../career_tracker_hr
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+    ports:
+    - 8000:8000
+    
+volumes:
+  db_value:

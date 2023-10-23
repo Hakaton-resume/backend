@@ -7,6 +7,8 @@ from rest_framework.routers import SimpleRouter
 # router = SimpleRouter()
 # router.register(r'students', StudentViewSet)
 
-# urlpatterns = [
-#     path('v1/', include(router.urls)),
-# ]
+urlpatterns = [
+    # path('v1/', include(router.urls)),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
+]

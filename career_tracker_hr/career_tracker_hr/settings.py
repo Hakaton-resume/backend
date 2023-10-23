@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 
 from pathlib import Path
@@ -31,6 +32,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -69,8 +72,8 @@ WSGI_APPLICATION = 'career_tracker_hr.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('ENGINE', default='django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'ENGINE': os.getenv('ENGINE', default='django.db.backends.sqlite3'),
+        'NAME': os.getenv('DB_NAME', default='db.sqlite3'),
         'USER': os.getenv('POSTGRES_USER', default='username'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='password'),
         'HOST': os.getenv('DB_HOST', default='localhost'),
@@ -119,3 +122,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer', ),
+}

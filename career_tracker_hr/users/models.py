@@ -8,6 +8,23 @@ class CustomUserManager(UserManager):
     pass
 
 
+class Company(models.Model):
+    name = models.CharField(
+        "Название",
+        max_length=255,
+        null=False,
+    )
+    logo = models.ImageField(
+        "Логотип",
+        upload_to="companies/logos/",
+        null=True,
+        default=None,
+    )
+
+    def __str__(self):
+        return f"{self.name}"
+
+
 class StudentUser(models.Model):
     pass
 
@@ -18,6 +35,7 @@ class HRUser(models.Model):
 
 class StaffUser(models.Model):
     pass
+
 
 class User(AbstractUser):
     role = models.CharField(

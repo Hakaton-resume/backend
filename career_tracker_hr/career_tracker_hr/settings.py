@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'users',
     'rest_framework',
     'djoser',
+    'career',
 ]
 
 

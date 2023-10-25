@@ -76,8 +76,87 @@ class StudentUser(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-
     )
+    birthdate = models.DateField(
+        'Дата рождения',
+        null=False,
+    )
+    brief = models.TextField(
+        'О себе',
+        max_length=1024,
+    )
+    photo = models.ImageField(
+        'Фотография',
+        upload_to='students/photoes/',
+        null=True,
+    )
+    telegram = models.CharField(
+        'Telegram',
+        max_length=32,
+        null=True,
+    )
+    phone = models.CharField(
+        'Телефон',
+        max_length=12,
+        null=True,
+    )
+    location = models.CharField(
+        'Город',
+        max_length=32,
+    )
+    cv = models.FileField(
+        'Резюме',
+        upload_to='students/cvs/',
+        null=True,
+    )
+    portfolio = models.FileField(
+        'Портфолио',
+        upload_to='students/portfolios/',
+        null=True,
+    )
+    education = models.CharField(
+        'Основное образование',
+        max_length=128,
+        null=True,
+    )
+    education_year = models.IntegerField(
+        'Год окончания учебного заведения',
+    )
+    course = models.CharField(
+        'Дополнительное образование',
+        max_length=128,
+        null=True,
+    )
+    course_year = models.IntegerField(
+        'Год окончания курсов',
+    )
+    seeking_for = models.BooleanField(
+        'Статус поиска',
+        default=True,
+    )
+    position = models.CharField(
+        'Должность',
+        max_length=128,
+        null=False,
+    )
+    level=models.CharField(
+        'Уровень',
+        max_length=128,
+        null=False,
+    )
+    experience = models.CharField(
+        'Опыт работы',
+        max_length=128,
+    )
+    format = models.CharField(
+        'Формат работы',
+        max_length=128,
+    )
+    salary = models.IntegerField(
+        'Желаемый доход',
+        null=True,
+    )
+    
 
 
 class HRUser(models.Model):

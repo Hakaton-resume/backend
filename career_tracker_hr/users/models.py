@@ -15,7 +15,6 @@ class CustomUserManager(BaseUserManager):
         user.email = email
         user.set_password(password)
         user.save(using=self._db)
-        # if 
         return user
     
     def create_superuser(self, email, password, role=STAFF, **extra_fields):

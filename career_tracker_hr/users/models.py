@@ -8,6 +8,17 @@ class CustomUserManager(UserManager):
     pass
 
 
+class StudentUser(models.Model):
+    pass
+
+
+class HRUser(models.Model):
+    pass
+
+
+class StaffUser(models.Model):
+    pass
+
 class User(AbstractUser):
     role = models.CharField(
         'Роль',

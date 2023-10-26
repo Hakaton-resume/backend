@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import (Activity, Skill, Resp, Tag,
+from .models import (Activity, Resp, Tag,
                      Vacancy, SkillVacancy, TagVacancy)
 
 # Register your models here.
@@ -8,9 +8,7 @@ from .models import (Activity, Skill, Resp, Tag,
 class ActivityAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(Skill)
-class SkillAdmin(admin.ModelAdmin):
-    pass
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):

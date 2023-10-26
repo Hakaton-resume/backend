@@ -1,12 +1,38 @@
+import base64
 from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
-                                        PrimaryKeyRelatedField)
+                                        PrimaryKeyRelatedField, ImageField)
+from django.core.files.base import ContentFile
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from api.utils import percentage_of_similarity
 from career.models import Favourite, Vacancy, Resp, Tag, Skill
-from users.models import StudentUser
+from users.models import Company, StudentUser
+
+
+class Base64ImageField(ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        return super().to_internal_value(data)
+
+
+class SkillSerializer(ModelSerializer):
+    """Сериализатор для навыков"""
+    class Meta:
+        fields = '__all__'
+        model = Skill
+
+
+class StudentSerializer(ModelSerializer):
+    skills = SkillSerializer(many=True, read_only=True)
+    
+    class Meta:
+       model = StudentUser
+       fields = ('id', 'skills')
 
 
 class TagSerializer(ModelSerializer):
@@ -17,11 +43,7 @@ class TagSerializer(ModelSerializer):
         model = Tag
 
 
-class SkillSerializer(ModelSerializer):
-    """Сериализатор для навыков"""
-    class Meta:
-        fields = '__all__'
-        model = Skill
+
 
 
 class RespSerializer(ModelSerializer):
@@ -39,24 +61,43 @@ class FavouriteSerializer(ModelSerializer):
        fields = '__all__'
 
 
-class StudentSerializer(ModelSerializer):
-
-   class Meta:
-       model = StudentUser
-       fields = '__all__'       
-
-
 class VacancySerializer(ModelSerializer):
-    
+    students = StudentSerializer(many=True, read_only=True)
+
     class Meta:
         model = Vacancy
         fields = (
             'name',
             'company',
             'tags',
-            'skills'
+            'skills',
+            'students',
         )       
 
+
+class CompanySerializer(ModelSerializer):
+    """Сериализатор для тегов вакансии"""
+    vacancies = SerializerMethodField()
+
+    class Meta:
+        fields = ('name', 'vacancies')
+        model = Company
+
+    def get_vacancies(self, obj):
+        vacancies = Vacancy.objects.filter(company=obj)
+        serializer = VacancySerializer(vacancies, many=True)
+        return serializer.data
+
+
+class FavoriteSerializer(ModelSerializer):
+    student = SerializerMethodField()
+
+    class Meta:
+        fields = ('students', 'vacancies')
+        model = Favourite
+    
+    def get_student(self, obj):
+        return obj.student
 
 #class VacancySerializer(ModelSerializer):
 #    favourites = SerializerMethodField()

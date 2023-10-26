@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .constants import CHOICES, HR, STAFF, STUDENT
-from career.models import Skill
+
 
 
 class CustomUserManager(BaseUserManager):
@@ -70,6 +70,21 @@ class Company(models.Model):
     def __str__(self):
         return f'{self.name}'
 
+
+class Skill(models.Model):
+    name = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name='Навык'
+    )
+
+    class Meta:
+        verbose_name = 'Навык'
+        verbose_name_plural = 'Навык'
+
+    def __str__(self):
+        return self.name   
+    
 
 class StudentUser(models.Model):
     user = models.ForeignKey(
@@ -165,25 +180,7 @@ class StudentUser(models.Model):
     )
 
 
-class HRUser(models.Model):
-    company = models.ManyToManyField(Company)
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-    )
-    
-    class Meta:
-        ordering = []
-
-
-class StaffUser(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-
-    )
-
-class SkillStudent(model.Model):
+class SkillStudent(models.Model):
     skill = models.ForeignKey(
         Skill,
         on_delete=models.CASCADE,
@@ -198,3 +195,21 @@ class SkillStudent(model.Model):
     class Meta:
         verbose_name = 'Навык студент'
         verbose_name_plural = 'Навык студент'
+
+
+class HRUser(models.Model):
+    company = models.ManyToManyField(Company)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        ordering = []
+
+
+class StaffUser(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )

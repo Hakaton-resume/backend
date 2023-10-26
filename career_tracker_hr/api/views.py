@@ -1,64 +1,81 @@
 from django.shortcuts import render
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from rest_framework.decorators import action
 from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
-                                   HTTP_400_BAD_REQUEST)
+                                   HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND)
 from rest_framework.viewsets import ModelViewSet
+
+from career.models import Favourite, Vacancy, Skill, Tag
+from users.models import StudentUser
+from api.serializers import (VacancySerializer, StudentSerializer,
+                             FavouriteSerializer, VacancyCandidateSerializer,
+                             SkillSerializer, TagSerializer,
+                             VacancyCreateSerializer, StudentSerializer)
+
+
+class TagViewSet(ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    #permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('^name',)
+
+
+class SkillViewSet(ModelViewSet):
+    queryset = Skill.objects.all()
+    serializer_class = SkillSerializer
+    #permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('^name',)    
 
 
 class StudentViewSet(ModelViewSet):
-    pass
+    queryset = StudentUser.objects.all()
+    serializer_class = StudentSerializer
+
+   # @action(
+   #     detail=True, 
+   #     methods=['post'],
+   #     url_path='favourites/(?P<vacancy_id>\d+)'
+   # )
+   # def to_favorite(self, request, pk=None, vacancy_id=None):
+   #     """Добавить студента в избранное вакансии"""
+   #     vacancy = get_object_or_404(Vacancy, id=vacancy_id)
+   #     student = get_object_or_404(StudentUser, id=pk)
+   #     Favourite.objects.create(vacancy=vacancy, student=student)
+   #     serializer = StudentSerializer(
+   #             student, context={'request': request}
+   #         )
+   #     return Response(serializer.data, status=HTTP_201_CREATED)
 
 
-#class VacancyViewSet(ModelViewSet):
-#    queryset = Vacancy.objects.all()
-#    # permission_classes =
-#
-#    @action(detail=True,
-#            methods=['post', 'delete']
-#            # permission_classes=[IsAuthenticated]
-#            )
-#    def resp(self, request, id):
-#        """Откликнуться на вакансию/отменить отклик"""
-#        user = request.user
-#        vacancy = get_object_or_404(Vacancy, id=id)
-#
-#        if request.method == 'POST':
-#            if Resp.objects.filter(user=user, vacancy=vacancy).exists():
-#                return Response(
-#                    {'errors': 'Вы уже откликались на эту вакансию'},
-#                    status=HTTP_400_BAD_REQUEST
-#                )
-#            resp = Resp.objects.create(user=user, vacancy=vacancy)
-#            serializer = RespSerializer(
-#                vacancy, context={'request': request}
-#            )
-#            return Response(serializer.data, status=HTTP_201_CREATED)
-#
-#        if request.method == 'DELETE':
-#            resp = Resp.objects.filter(user=user, vacancy=vacancy)
-#            if resp.exists():
-#                resp.delete()
-#                return Response(status=HTTP_204_NO_CONTENT)
-#            return Response(
-#                {'error': 'Вы не откликались на эту вакансию'},
-#                status=HTTP_400_BAD_REQUEST
-#            )
-#    
-#    @action(detail=True,
-#            # permission_classes=[IsAuthenticated]
-#    )
-#    def candidates(self, request, id):
-#        """Возвращает два списка кандидатов кандидатов"""
-#       vacancy = get_object_or_404(Vacancy, id=id)
-#        serializer = VacancySerializer(
-#                vacancy, context={'request': request}
-#        )
-#        return self.get_paginated_response(serializer.data)
-#
-#    def perform_create(self, serializer):
-#        serializer.save(author=self.request.user)
-#
-#    def perform_destroy(self, instance):
-#        instance.image.delete()
-#        instance.delete() 
+class VacancyViewSet(ModelViewSet):
+    queryset = Vacancy.objects.all()
+
+    #@action(
+    #    detail=True,
+    #)
+    #def favourites(self, request, pk=None):
+    #    """Просмотреть список избранных"""
+    #    vacancy = get_object_or_404(Vacancy, id=pk)
+    #    serializer = VacancySerializer(vacancy, context={'request': request})
+    #    return Response(serializer.data)
+
+
+    #@action(detail=True,
+    #        # permission_classes=[IsAuthenticated]
+    #)
+    #def candidates(self, request, pk):
+    #    """Возвращает два списка кандидатов"""
+    #    vacancy = get_object_or_404(Vacancy, id=id)
+    #    serializer = VacancySerializer(
+    #            vacancy, context={'request': request}
+    #    )
+    #    return Response(serializer.data)
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return VacancySerializer
+        return VacancyCreateSerializer

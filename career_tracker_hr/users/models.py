@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .constants import CHOICES, HR, STAFF, STUDENT
+from career.models import Skill
 
 
 class CustomUserManager(BaseUserManager):
@@ -27,8 +28,6 @@ class CustomUserManager(BaseUserManager):
         if role == STAFF:
             return self.create_superuser(email, password, role, extra_fields)
         return self._create_user(email, password, role, **extra_fields)
-
-
 
 
 
@@ -156,7 +155,14 @@ class StudentUser(models.Model):
         'Желаемый доход',
         null=True,
     )
-    
+    skills = models.ManyToManyField(
+        Skill,
+        through='SkillStudent',
+        verbose_name='Навыки',
+        help_text='Выберите навыки',
+        related_name='student_skill',
+        blank=False
+    )
 
 
 class HRUser(models.Model):
@@ -164,7 +170,6 @@ class HRUser(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-
     )
     
     class Meta:
@@ -177,3 +182,19 @@ class StaffUser(models.Model):
         on_delete=models.CASCADE,
 
     )
+
+class SkillStudent(model.Model):
+    skill = models.ForeignKey(
+        Skill,
+        on_delete=models.CASCADE,
+        verbose_name='Навык'
+    )
+    student = models.ForeignKey(
+        StudentUser,
+        on_delete=models.CASCADE,
+        verbose_name='Вакансия'
+    )
+
+    class Meta:
+        verbose_name = 'Навык студент'
+        verbose_name_plural = 'Навык студент'

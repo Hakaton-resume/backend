@@ -2,9 +2,9 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from career.models import Activity
+from career.models import Activity, Skill
 
-from .constants import CHOICES, HR, STAFF, STUDENT
+from .constants import CHOICES, STAFF, STUDENT
 
 
 class CustomUserManager(BaseUserManager):
@@ -18,13 +18,13 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def create_superuser(self, email, password, role=STAFF, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)
 
         return self._create_user(email, password, role, **extra_fields)
-    
+
     def create_user(self, email, password, role=STUDENT, **extra_fields):
         if role == STAFF:
             return self.create_superuser(email, password, role, extra_fields)
@@ -42,7 +42,7 @@ class User(AbstractUser):
         choices=CHOICES,
         default=STUDENT
     )
-    
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
@@ -138,7 +138,7 @@ class StudentUser(models.Model):
         max_length=128,
         null=False,
     )
-    level=models.CharField(
+    level = models.CharField(
         'Уровень',
         max_length=128,
         null=False,
@@ -167,7 +167,6 @@ class StudentUser(models.Model):
     )
 
 
-
 class StudentsActivities(models.Model):
     student = models.ForeignKey(
         StudentUser,
@@ -175,10 +174,10 @@ class StudentsActivities(models.Model):
         related_name='student_skills',
         verbose_name='Соискатель'
     )
-    activity=models.ForeignKey(
+    activity = models.ForeignKey(
         Activity,
         on_delete=models.CASCADE,
-        related_name = 'student_activities',
+        related_name='student_activities',
         verbose_name='Активность',
     )
 
@@ -190,10 +189,10 @@ class StudentsSkills(models.Model):
         related_name='student_activities',
         verbose_name='Соискатель'
     )
-    skills=models.ForeignKey(
+    skills = models.ForeignKey(
         Skill,
         on_delete=models.CASCADE,
-        related_name = 'student_skills',
+        related_name='student_skills',
         verbose_name='Навыки',
     )
 
@@ -205,7 +204,7 @@ class HRUser(models.Model):
         on_delete=models.CASCADE,
 
     )
-    
+
     class Meta:
         ordering = []
 

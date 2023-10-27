@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from career.models import Activity
 from .constants import CHOICES, HR, STAFF, STUDENT
 
 
@@ -156,7 +157,11 @@ class StudentUser(models.Model):
         'Желаемый доход',
         null=True,
     )
-    
+    activities = models.ManyToManyField(
+        Activity,
+        through='StudentsActivity',
+        related_name='students'
+    )
 
 
 class HRUser(models.Model):

@@ -66,4 +66,4 @@ jobs:
           sudo docker compose up -d
           sudo docker compose exec career_tracker_hr python manage.py makemigrations
           sudo docker compose exec career_tracker_hr python manage.py migrate
-          sudo docker compose exec career_tracker_hr python manage.py migrate
+          sudo docker compose exec career_tracker_hr python manage.py collectstatic --no-input

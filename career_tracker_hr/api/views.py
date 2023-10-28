@@ -3,11 +3,12 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
-from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
+from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_200_OK,
                                    HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND)
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
                                         PrimaryKeyRelatedField, ImageField)
+from django.http import HttpResponse
 
 from career.models import Favourite, Vacancy, Skill, Tag, Resp, Invitation
 from users.models import StudentUser, Company
@@ -16,7 +17,7 @@ from api.serializers import (VacancySerializer, StudentSerializer,
                              VacancyCreateSerializer, StudentSerializer, VacancyCreateFavouriteSerializer,
                              CompanySerializer, VacancyResponseSerializer,
                              VacancyFavouriteSerializer, VacancyInvitationSerializer)
-
+from api.utils import download_file
 
 class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
@@ -43,6 +44,31 @@ class CompanyViewSet(ModelViewSet):
 class StudentViewSet(ModelViewSet):
     queryset = StudentUser.objects.all()
     serializer_class = StudentSerializer
+
+    @action(detail=True)
+    def download_cv(self, request, pk=None):
+        cv = self.get_object().cv
+        
+        if cv:
+            return download_file(cv)
+        else:
+            return Response(
+                {'detail': 'Резюме не найдено'},
+                status=HTTP_404_NOT_FOUND
+            )
+
+
+    @action(detail=True)
+    def download_portfolio(self, request, pk=None):
+        portfolio = self.get_object().portfolio
+        
+        if portfolio:
+            return download_file(portfolio)
+        else:
+            return Response(
+                {'detail': 'Портфолио не было загружено пользователем'},
+                status=HTTP_404_NOT_FOUND
+            )
 
 
 class VacancyViewSet(ModelViewSet):

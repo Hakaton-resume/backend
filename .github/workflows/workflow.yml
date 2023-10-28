@@ -1,12 +1,7 @@
 name: career_tracker
 
 on:
-  push:
-    branches:
-      - main
-
   workflow_dispatch:
-  
 
 jobs:
   
@@ -56,7 +51,7 @@ jobs:
         key: ${{ secrets.SSH_HOST_PUBLIC }}
         script: |
           sudo docker compose stop
-          sudo docker compose rm backend -sf
+          sudo docker compose rm career_tracker_hr -sf
           echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
           echo DB_NAME=${{ secrets.DB_NAME }} >> .env
           echo DB_USER=${{ secrets.DB_USER }} >> .env
@@ -69,6 +64,6 @@ jobs:
           echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .postgresql
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .postgresql
           sudo docker compose up -d
-          sudo docker compose exec backend python manage.py makemigrations
-          sudo docker compose exec backend python manage.py migrate
-          sudo docker compose exec backend python manage.py collectstatic --no-input
+          sudo docker compose exec career_tracker_hr python manage.py makemigrations
+          sudo docker compose exec career_tracker_hr python manage.py migrate
+          sudo docker compose exec career_tracker_hr python manage.py collectstatic --no-input

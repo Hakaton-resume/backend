@@ -5,7 +5,7 @@ from django.db.models import (CASCADE, CharField, DateTimeField,
                               ManyToManyField, Model, SlugField,
                               TextField, UniqueConstraint)
 
-from users.models import StudentUser, Company
+from users.models import StudentUser, Company, Skill
 
 
 class Tag(Model):
@@ -20,22 +20,7 @@ class Tag(Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return self.name
-
-
-class Skill(Model):
-    name = CharField(
-        max_length=50,
-        unique=True,
-        verbose_name='Навык'
-    )
-
-    class Meta:
-        verbose_name = 'Навык'
-        verbose_name_plural = 'Навык'
-
-    def __str__(self):
-        return self.name        
+        return self.name     
 
 
 class Activity(models.Model):
@@ -75,7 +60,6 @@ class Vacancy(models.Model):
         on_delete=models.CASCADE
     )
     
-
     class Meta:
         verbose_name = 'Вакансия'
         verbose_name_plural = 'Вакансии'
@@ -92,7 +76,7 @@ class Favourite(Model):
         Vacancy,
         on_delete=CASCADE,
         verbose_name='Вакансия',
-        related_name='vacancy'
+        related_name='favourites'
     )
 
     class Meta:
@@ -109,7 +93,8 @@ class Resp(Model):
     vacancy = ForeignKey(
         Vacancy,
         on_delete=CASCADE,
-        verbose_name='Вакансия'
+        verbose_name='Вакансия',
+        related_name='responses'
     )
 
     class Meta:
@@ -138,6 +123,7 @@ class SkillVacancy(Model):
     skill = ForeignKey(
         Skill,
         on_delete=CASCADE,
+        related_name='skill',
         verbose_name='Навык'
     )
     vacancy = ForeignKey(
@@ -145,7 +131,31 @@ class SkillVacancy(Model):
         on_delete=CASCADE,
         verbose_name='Вакансия'
     )
+    weigh = IntegerField(verbose_name='Вес')
 
     class Meta:
         verbose_name = 'Навык вакансии'
         verbose_name_plural = 'Навык вакансии'
+        constraints = [UniqueConstraint(
+            fields=('vacancy', 'skill'),
+            name='vacancy_skill'
+        )]
+
+
+class Invitation(Model):
+    student = ForeignKey(
+        StudentUser,
+        on_delete=CASCADE,
+        verbose_name='Студент'
+    )
+    vacancy = ForeignKey(
+        Vacancy,
+        on_delete=CASCADE,
+        verbose_name='Вакансия',
+        related_name='invitation'
+    )
+
+    class Meta:
+        verbose_name = 'Приглашение'
+        verbose_name_plural = 'Приглашения'
+

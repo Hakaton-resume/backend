@@ -1,14 +1,12 @@
 from django.contrib import admin
 
-from .models import (Activity, Resp, Tag,
+from .models import (Activity, Resp, Tag, Favourite, Invitation,
                      Vacancy, SkillVacancy, TagVacancy)
 
-# Register your models here.
+
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
     pass
-
-
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -28,4 +26,12 @@ class TagVacancyAdmin(admin.ModelAdmin):
 
 @admin.register(SkillVacancy)
 class SkillVacancyAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Favourite)
+class FavouriteAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Invitation)
+class FavouriteAdmin(admin.ModelAdmin):
     pass

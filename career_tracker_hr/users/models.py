@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from .constants import CHOICES, HR, STAFF, STUDENT
 
 
-
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -17,18 +16,17 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def create_superuser(self, email, password, role=STAFF, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_staff', True)
 
         return self._create_user(email, password, role, **extra_fields)
-    
+
     def create_user(self, email, password, role=STUDENT, **extra_fields):
         if role == STAFF:
             return self.create_superuser(email, password, role, extra_fields)
         return self._create_user(email, password, role, **extra_fields)
-
 
 
 class User(AbstractUser):
@@ -42,7 +40,7 @@ class User(AbstractUser):
         choices=CHOICES,
         default=STUDENT
     )
-    
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
@@ -83,8 +81,8 @@ class Skill(models.Model):
         verbose_name_plural = 'Навык'
 
     def __str__(self):
-        return self.name   
-    
+        return self.name
+
 
 class StudentUser(models.Model):
     user = models.ForeignKey(
@@ -153,7 +151,7 @@ class StudentUser(models.Model):
         max_length=128,
         null=False,
     )
-    level=models.CharField(
+    level = models.CharField(
         'Уровень',
         max_length=128,
         null=False,
@@ -195,7 +193,7 @@ class SkillStudent(models.Model):
     class Meta:
         verbose_name = 'Навык студент'
         verbose_name_plural = 'Навык студент'
-
+        
 
 class HRUser(models.Model):
     company = models.ManyToManyField(Company)

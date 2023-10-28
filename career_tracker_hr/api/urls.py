@@ -13,6 +13,7 @@ v1_router.register(r'tags', TagViewSet, basename='tags')
 v1_router.register(r'skills', SkillViewSet, basename='skills')
 v1_router.register(r'companies', CompanyViewSet, basename='companies')
 
+
 urlpatterns = [
     path('', include(v1_router.urls)),
     path('auth/', include('djoser.urls')),

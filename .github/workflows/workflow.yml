@@ -1,5 +1,13 @@
 name: career_tracker
 
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+  
+
 jobs:
   
   build_and_push_to_docker_hub:

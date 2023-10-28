@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_200_OK,
@@ -10,39 +11,45 @@ from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
                                         PrimaryKeyRelatedField, ImageField)
 from django.http import HttpResponse
 
-from career.models import Vacancy, Skill, Tag, Favourite, Invitation
+from career.models import Vacancy, Skill, Tag, Favourite, Invitation, Resp
 from users.models import StudentUser, Company
 from api.serializers import (VacancyResponseSerializer, StudentSerializer,
-                             SkillSerializer, TagSerializer,
+                             SkillSerializer, TagSerializer, ResponseSerializer,
                              VacancyCreateSerializer, StudentSerializer,
-                             CompanySerializer, VacancyCreateFavouriteSerializer)
+                             CompanySerializer, VacancyCreateFavouriteSerializer,
+                             VacancyFavouriteSerializer, VacancyInvitationSerializer)
 from api.utils import download_file
+from api.filters import SkillFilter, TagFilter
 
 class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    filter_backends = (SearchFilter,)
+    # permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
     search_fields = ('^name',)
+    filterset_class = TagFilter
 
 
 class SkillViewSet(ModelViewSet):
     queryset = Skill.objects.all()
     serializer_class = SkillSerializer
-    filter_backends = (SearchFilter,)
-    search_fields = ('^name',) 
+    # permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
+    search_fields = ('^name',)
+    filterset_class = SkillFilter
 
 
 class CompanyViewSet(ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     #permission_classes = (IsAdminOrReadOnly,)
-    #filter_backends = (SearchFilter,)
-    #search_fields = ('^name',)        
 
 
 class StudentViewSet(ModelViewSet):
     queryset = StudentUser.objects.all()
     serializer_class = StudentSerializer
+    # permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, SearchFilter,)
 
     @action(detail=True)
     def download_cv(self, request, pk=None):
@@ -74,11 +81,11 @@ class StudentViewSet(ModelViewSet):
 class VacancyViewSet(ModelViewSet):
     queryset = Vacancy.objects.all()
  
-    @action(detail=True)
-    def response(self, request, pk=None):
-        vacancy = self.get_object()
-        serializer = self.get_serializer(vacancy)
-        return Response(serializer.data)
+   # @action(detail=True)
+    #def response(self, request, pk=None):
+    #    vacancy = self.get_object()
+    #    serializer = self.get_serializer(vacancy)
+    #    return Response(serializer.data)
 
     @action(
         detail=True,
@@ -154,10 +161,54 @@ class VacancyViewSet(ModelViewSet):
                     {'errors': 'Студент не был приглашен'},
                     status=HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['get'])
+    def response(self, request, pk=None):
+        vacancy = self.get_object()
+        serializer = self.get_serializer(vacancy)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def favourites(self, request, pk=None):
+        vacancy = self.get_object()
+        serializer = VacancyFavouriteSerializer(
+            vacancy,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'])
+    def invitations(self, request, pk=None):
+        vacancy = self.get_object()
+        serializer = self.get_serializer(vacancy)
+        return Response(serializer.data)
+
     def get_serializer_class(self):
-        if self.action == 'list' or self.action == 'retrieve':
-        #if self.action == 'response':
+        if self.action == 'response':
             return VacancyResponseSerializer
-        #elif self.action == 'to_favourite':
-        #    return VacancyCreateFavouriteSerializer
+        elif self.action == 'invitations':
+            return VacancyInvitationSerializer
+        elif self.action == 'favourites':
+            return VacancyFavouriteSerializer
+        elif self.action == 'to_favourite':
+            return VacancyCreateFavouriteSerializer
         return VacancyCreateSerializer
+
+
+class ResponseViewSet(ModelViewSet):
+    queryset = Resp.objects.all()
+    serializer_class = ResponseSerializer
+ 
+    @action(
+        detail=False,
+        url_path='(?P<vacancy_id>\d+)'
+    )
+    def get_responses(self, request, vacancy_id=None):
+        vacancy = get_object_or_404(Vacancy, pk=vacancy_id)
+        responses = Resp.objects.filter(vacancy=vacancy)
+        serializer = ResponseSerializer(
+            responses,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+

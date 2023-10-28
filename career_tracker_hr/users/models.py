@@ -2,8 +2,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from career.models import Activity, Skill
-
 from .constants import CHOICES, STAFF, STUDENT
 
 
@@ -71,16 +69,27 @@ class Company(models.Model):
         return f'{self.name}'
 
 
+class Activity(models.Model):
+    name = models.CharField(
+        'Название',
+        max_length=128,
+    )
+
+    class Meta:
+        verbose_name = 'Активность'
+        verbose_name_plural = 'Активности'
+
+
 class Skill(models.Model):
     name = models.CharField(
-        max_length=50,
+        max_length=128,
         unique=True,
         verbose_name='Навык'
     )
 
     class Meta:
         verbose_name = 'Навык'
-        verbose_name_plural = 'Навык'
+        verbose_name_plural = 'Навыки'
 
     def __str__(self):
         return self.name
@@ -177,19 +186,12 @@ class StudentUser(models.Model):
     )
     skills = models.ManyToManyField(
         Skill,
-        through='StudentsSkills',
-        verbose_name='Навыки',
-    )
-    
-    skills = models.ManyToManyField(
-        Skill,
         through='SkillStudent',
         verbose_name='Навыки',
         help_text='Выберите навыки',
         related_name='student_skill',
         blank=False
     )
-
 
 
 class StudentsActivities(models.Model):
@@ -207,7 +209,7 @@ class StudentsActivities(models.Model):
     )
 
 
-class StudentsSkills(models.Model):
+class SkillStudent(models.Model):
     student = models.ForeignKey(
         StudentUser,
         on_delete=models.CASCADE,
@@ -219,7 +221,6 @@ class StudentsSkills(models.Model):
         on_delete=models.CASCADE,
         related_name='student_skills',
         verbose_name='Навыки',
-
     )
 
     class Meta:

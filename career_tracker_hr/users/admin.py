@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Company, HRUser,  StudentUser, User, Skill, SkillStudent
+from .models import Activity, Company, HRUser,  StudentUser, User, Skill, SkillStudent
 
 
 @admin.register(User)
@@ -26,6 +26,11 @@ class CompanyAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Activity)
+class ActivityAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(HRUser)
 class HRUserAdmin(admin.ModelAdmin):
     pass
@@ -39,6 +44,7 @@ class StudentUserAdmin(admin.ModelAdmin):
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(SkillStudent)
 class SkillStudentAdmin(admin.ModelAdmin):

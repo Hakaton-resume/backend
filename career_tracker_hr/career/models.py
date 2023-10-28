@@ -24,16 +24,65 @@ class Tag(Model):
         return self.name     
 
 
-
-class Activity(models.Model):
+class Vacancy(models.Model):
+    company = models.ForeignKey(
+        'users.Company',
+        on_delete=models.CASCADE,
+    )
+    company_name = models.CharField(
+        'Название компании',
+        max_length=128,
+    )
+    company_info = models.TextField(
+        'Информация о компании',
+    )
+    location = models.CharField(
+        'Город',
+        max_length=32,
+    )
+    pub_date = models.DateField(
+        'Дата публикации',
+        default=now,
+    )
     name = models.CharField(
         'Название',
-        max_length=128,
+        max_length=256,
+    )
+    experience = models.CharField(
+        'Опыт работы',
+        max_length=32,
+    )
+    description = models.TextField(
+        'Описание',
+    )
+    responsibilities = models.TextField(
+        'Обязанности',
+    )
+    form = models.CharField(
+        'Форма работы',
+        max_length=32,
+    )
+    reject_letter = models.TextField(
+        'Отказ соискателю',
+    )
+    additional_info = models.TextField(
+        'Дополнительная информация',
+    )
+    tags = models.ManyToManyField(
+        Tag,
+        through='TagVacancy',
+        verbose_name='Требуемые навыки',
+    )
+
+    skills = models.ManyToManyField(
+        Skill,
+        through='SkillVacancy',
+        verbose_name='Требуемые навыки',
     )
 
     class Meta:
-        verbose_name = 'Активность'
-        verbose_name_plural = 'Активности'
+        verbose_name = 'Ваканcия'
+        verbose_name_plural = 'Вакансии'
 
 
 class Favourite(Model):
@@ -108,87 +157,7 @@ class Invitation(Model):
         verbose_name_plural = 'Приглашения'
 
 
-
-
-
-
-class Skill(models.Model):
-    name = models.CharField(
-        'Навык',
-        max_length=128,
-    )
-
-    class Meta:
-        verbose_name = 'Навык'
-        verbose_name_plural = 'Навыки'
-
-        
-        
-        
-        
-
-class Vacancy(models.Model):
-    company = models.ForeignKey(
-        'users.Company',
-        on_delete=models.CASCADE,
-    )
-    company_name = models.CharField(
-        'Название компании',
-        max_length=128,
-    )
-    company_info = models.TextField(
-        'Информация о компании',
-    )
-    location = models.CharField(
-        'Город',
-        max_length=32,
-    )
-    pub_date = models.DateField(
-        'Дата публикации',
-        default=now,
-    )
-    name = models.CharField(
-        'Название',
-        max_length=256,
-    )
-    experience = models.CharField(
-        'Опыт работы',
-        max_length=32,
-    )
-    description = models.TextField(
-        'Описание',
-    )
-    responsibilities = models.TextField(
-        'Обязанности',
-    )
-    form = models.CharField(
-        'Форма работы',
-        max_length=32,
-    )
-    reject_letter = models.TextField(
-        'Отказ соискателю',
-    )
-    additional_info = models.TextField(
-        'Дополнительная информация',
-    )
-    tags = models.ManyToManyField(
-        Tag,
-        through='VacancyTags',
-        verbose_name='Требуемые навыки',
-    )
-    )
-    skills = models.ManyToManyField(
-        Skill,
-        through='VacancySkills',
-        verbose_name='Требуемые навыки',
-    )
-
-    class Meta:
-        verbose_name = 'Ваканcия'
-        verbose_name_plural = 'Вакансии'
-
-
-class VacancySkills(models.Model):
+class SkillVacancy(models.Model):
     vacancy = models.ForeignKey(
         Vacancy,
         on_delete=models.CASCADE,
@@ -200,4 +169,3 @@ class VacancySkills(models.Model):
     weigth = models.IntegerField(
         'Вес навыка'
     )
-

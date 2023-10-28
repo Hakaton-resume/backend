@@ -1,13 +1,9 @@
 from django.contrib import admin
 
 
-from .models import (Activity, Favourite, Invitation, Resp,
+from .models import (Favourite, Invitation, Resp,
                      SkillVacancy, Tag, Vacancy, TagVacancy)
 
-
-@admin.register(Activity)
-class ActivityAdmin(admin.ModelAdmin):
-    pass
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -37,9 +33,3 @@ class FavouriteAdmin(admin.ModelAdmin):
 class FavouriteAdmin(admin.ModelAdmin):
     pass
   
-  
-  
-
-@admin.register(Skill)
-class SkillAdmin(admin.ModelAdmin):
-    pass

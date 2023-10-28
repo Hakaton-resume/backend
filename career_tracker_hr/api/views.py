@@ -90,14 +90,12 @@ class VacancyViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
-            return VacancySerializer
-        if self.action == 'response':
-            return VacancyResponseSerializer
-        elif self.action == 'invitations':
-            return VacancyInvitationSerializer
-        elif self.action == 'favourites':
-            return VacancyFavouriteSerializer
-        elif self.action == 'to_favourite':
-            return VacancyCreateFavouriteSerializer
-        elif self.request.method == 'POST':
-            return VacancyCreateSerializer
+            if self.action == 'response':
+                return VacancyResponseSerializer
+            elif self.action == 'invitations':
+                return VacancyInvitationSerializer
+            elif self.action == 'favourites':
+                return VacancyFavouriteSerializer
+            elif self.action == 'to_favourite':
+                return VacancyCreateFavouriteSerializer
+        return VacancyCreateSerializer

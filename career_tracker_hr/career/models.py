@@ -32,7 +32,11 @@ class Tag(models.Model):
 
 
 class Vacancy(models.Model):
-    company = models.CharField(
+    company = models.ForeignKey(
+        'users.Company',
+        on_delete=models.CASCADE,
+    )
+    company_name = models.CharField(
         'Название компании',
         max_length=128,
     )
@@ -65,8 +69,35 @@ class Vacancy(models.Model):
         'Форма работы',
         max_length=32,
     )
-
+    reject_letter = models.TextField(
+        'Отказ соискателю',
+    )
+    additional_info = models.TextField(
+        'Дополнительная информация',
+    )
+    tags = models.ManyToManyField(
+        Tag,
+    )
+    skills = models.ManyToManyField(
+        Skill,
+        through='VacancySkills',
+        verbose_name='Требуемые навыки',
+    )
 
     class Meta:
         verbose_name = 'Ваканcия'
         verbose_name_plural = 'Вакансии'
+
+
+class VacancySkills(models.Model):
+    vacancy = models.ForeignKey(
+        Vacancy,
+        on_delete=models.CASCADE,
+    )
+    skill = models.ForeignKey(
+        Skill,
+        on_delete=models.CASCADE,
+    )
+    weigth = models.IntegerField(
+        'Вес навыка'
+    )

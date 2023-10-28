@@ -6,13 +6,14 @@ from django.db.models import (CASCADE, CharField, DateTimeField,
                               TextField, UniqueConstraint)
 
 from users.models import StudentUser, Company, Skill
+from django.utils.timezone import now
 
 
 class Tag(Model):
     name = CharField(
-        max_length=50,
+        max_length=64,
         unique=True,
-        verbose_name='Тег'
+        verbose_name='Название'
     )
 
     class Meta:
@@ -21,6 +22,7 @@ class Tag(Model):
 
     def __str__(self):
         return self.name     
+
 
 
 class Activity(models.Model):
@@ -32,37 +34,6 @@ class Activity(models.Model):
     class Meta:
         verbose_name = 'Активность'
         verbose_name_plural = 'Активности'
-
-
-class Vacancy(models.Model):
-    name = models.CharField(
-        'Название',
-        max_length=128,
-    )
-    tags = ManyToManyField(
-        Tag,
-        through='TagVacancy',
-        verbose_name='Теги',
-        help_text='Выберите теги',
-        related_name='vacancy_tag',
-        blank=False
-    )
-    skills = ManyToManyField(
-        Skill,
-        through='SkillVacancy',
-        verbose_name='Навыки',
-        help_text='Выберите навыки',
-        related_name='vacancy_skill',
-        blank=False
-    )
-    company = ForeignKey(
-        Company,
-        on_delete=models.CASCADE
-    )
-    
-    class Meta:
-        verbose_name = 'Вакансия'
-        verbose_name_plural = 'Вакансии'
 
 
 class Favourite(Model):
@@ -119,29 +90,6 @@ class TagVacancy(Model):
         verbose_name_plural = 'Теги вакансии'
 
 
-class SkillVacancy(Model):
-    skill = ForeignKey(
-        Skill,
-        on_delete=CASCADE,
-        related_name='skill',
-        verbose_name='Навык'
-    )
-    vacancy = ForeignKey(
-        Vacancy,
-        on_delete=CASCADE,
-        verbose_name='Вакансия'
-    )
-    weigh = IntegerField(verbose_name='Вес')
-
-    class Meta:
-        verbose_name = 'Навык вакансии'
-        verbose_name_plural = 'Навык вакансии'
-        constraints = [UniqueConstraint(
-            fields=('vacancy', 'skill'),
-            name='vacancy_skill'
-        )]
-
-
 class Invitation(Model):
     student = ForeignKey(
         StudentUser,
@@ -158,4 +106,98 @@ class Invitation(Model):
     class Meta:
         verbose_name = 'Приглашение'
         verbose_name_plural = 'Приглашения'
+
+
+
+
+
+
+class Skill(models.Model):
+    name = models.CharField(
+        'Навык',
+        max_length=128,
+    )
+
+    class Meta:
+        verbose_name = 'Навык'
+        verbose_name_plural = 'Навыки'
+
+        
+        
+        
+        
+
+class Vacancy(models.Model):
+    company = models.ForeignKey(
+        'users.Company',
+        on_delete=models.CASCADE,
+    )
+    company_name = models.CharField(
+        'Название компании',
+        max_length=128,
+    )
+    company_info = models.TextField(
+        'Информация о компании',
+    )
+    location = models.CharField(
+        'Город',
+        max_length=32,
+    )
+    pub_date = models.DateField(
+        'Дата публикации',
+        default=now,
+    )
+    name = models.CharField(
+        'Название',
+        max_length=256,
+    )
+    experience = models.CharField(
+        'Опыт работы',
+        max_length=32,
+    )
+    description = models.TextField(
+        'Описание',
+    )
+    responsibilities = models.TextField(
+        'Обязанности',
+    )
+    form = models.CharField(
+        'Форма работы',
+        max_length=32,
+    )
+    reject_letter = models.TextField(
+        'Отказ соискателю',
+    )
+    additional_info = models.TextField(
+        'Дополнительная информация',
+    )
+    tags = models.ManyToManyField(
+        Tag,
+        through='VacancyTags',
+        verbose_name='Требуемые навыки',
+    )
+    )
+    skills = models.ManyToManyField(
+        Skill,
+        through='VacancySkills',
+        verbose_name='Требуемые навыки',
+    )
+
+    class Meta:
+        verbose_name = 'Ваканcия'
+        verbose_name_plural = 'Вакансии'
+
+
+class VacancySkills(models.Model):
+    vacancy = models.ForeignKey(
+        Vacancy,
+        on_delete=models.CASCADE,
+    )
+    skill = models.ForeignKey(
+        Skill,
+        on_delete=models.CASCADE,
+    )
+    weigth = models.IntegerField(
+        'Вес навыка'
+    )
 

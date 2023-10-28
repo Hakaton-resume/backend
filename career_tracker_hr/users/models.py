@@ -2,7 +2,9 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .constants import CHOICES, HR, STAFF, STUDENT
+from career.models import Activity, Skill
+
+from .constants import CHOICES, STAFF, STUDENT
 
 
 class CustomUserManager(BaseUserManager):
@@ -168,6 +170,17 @@ class StudentUser(models.Model):
         'Желаемый доход',
         null=True,
     )
+    activities = models.ManyToManyField(
+        Activity,
+        through='StudentsActivities',
+        verbose_name='Активности',
+    )
+    skills = models.ManyToManyField(
+        Skill,
+        through='StudentsSkills',
+        verbose_name='Навыки',
+    )
+    
     skills = models.ManyToManyField(
         Skill,
         through='SkillStudent',
@@ -178,16 +191,35 @@ class StudentUser(models.Model):
     )
 
 
-class SkillStudent(models.Model):
-    skill = models.ForeignKey(
-        Skill,
-        on_delete=models.CASCADE,
-        verbose_name='Навык'
-    )
+
+class StudentsActivities(models.Model):
     student = models.ForeignKey(
         StudentUser,
         on_delete=models.CASCADE,
-        verbose_name='Вакансия'
+        related_name='student_skills',
+        verbose_name='Соискатель'
+    )
+    activity = models.ForeignKey(
+        Activity,
+        on_delete=models.CASCADE,
+        related_name='student_activities',
+        verbose_name='Активность',
+    )
+
+
+class StudentsSkills(models.Model):
+    student = models.ForeignKey(
+        StudentUser,
+        on_delete=models.CASCADE,
+        related_name='student_activities',
+        verbose_name='Соискатель'
+    )
+    skills = models.ForeignKey(
+        Skill,
+        on_delete=models.CASCADE,
+        related_name='student_skills',
+        verbose_name='Навыки',
+
     )
 
     class Meta:

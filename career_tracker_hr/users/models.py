@@ -71,6 +71,21 @@ class Company(models.Model):
         return f'{self.name}'
 
 
+class Skill(models.Model):
+    name = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name='Навык'
+    )
+
+    class Meta:
+        verbose_name = 'Навык'
+        verbose_name_plural = 'Навык'
+
+    def __str__(self):
+        return self.name
+
+
 class StudentUser(models.Model):
     user = models.ForeignKey(
         User,
@@ -165,6 +180,16 @@ class StudentUser(models.Model):
         through='StudentsSkills',
         verbose_name='Навыки',
     )
+    
+    skills = models.ManyToManyField(
+        Skill,
+        through='SkillStudent',
+        verbose_name='Навыки',
+        help_text='Выберите навыки',
+        related_name='student_skill',
+        blank=False
+    )
+
 
 
 class StudentsActivities(models.Model):
@@ -194,15 +219,19 @@ class StudentsSkills(models.Model):
         on_delete=models.CASCADE,
         related_name='student_skills',
         verbose_name='Навыки',
+
     )
 
+    class Meta:
+        verbose_name = 'Навык студент'
+        verbose_name_plural = 'Навык студент'
+        
 
 class HRUser(models.Model):
     company = models.ManyToManyField(Company)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-
     )
 
     class Meta:
@@ -213,5 +242,4 @@ class StaffUser(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-
     )

@@ -32,4 +32,3 @@ class FavouriteAdmin(admin.ModelAdmin):
 @admin.register(Invitation)
 class FavouriteAdmin(admin.ModelAdmin):
     pass
-  

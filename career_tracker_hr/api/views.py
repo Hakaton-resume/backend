@@ -10,13 +10,12 @@ from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
                                         PrimaryKeyRelatedField, ImageField)
 from django.http import HttpResponse
 
-from career.models import Favourite, Vacancy, Skill, Tag, Resp, Invitation
+from career.models import Vacancy, Skill, Tag, Favourite, Invitation
 from users.models import StudentUser, Company
-from api.serializers import (VacancySerializer, StudentSerializer,
+from api.serializers import (VacancyResponseSerializer, StudentSerializer,
                              SkillSerializer, TagSerializer,
-                             VacancyCreateSerializer, StudentSerializer, VacancyCreateFavouriteSerializer,
-                             CompanySerializer, VacancyResponseSerializer,
-                             VacancyFavouriteSerializer, VacancyInvitationSerializer)
+                             VacancyCreateSerializer, StudentSerializer,
+                             CompanySerializer, VacancyCreateFavouriteSerializer)
 from api.utils import download_file
 
 class TagViewSet(ModelViewSet):
@@ -47,6 +46,7 @@ class StudentViewSet(ModelViewSet):
 
     @action(detail=True)
     def download_cv(self, request, pk=None):
+        """Загрузить резюме"""
         cv = self.get_object().cv
         
         if cv:
@@ -60,6 +60,7 @@ class StudentViewSet(ModelViewSet):
 
     @action(detail=True)
     def download_portfolio(self, request, pk=None):
+        """Загрузить портфолио"""
         portfolio = self.get_object().portfolio
         
         if portfolio:
@@ -70,58 +71,93 @@ class StudentViewSet(ModelViewSet):
                 status=HTTP_404_NOT_FOUND
             )
 
-
 class VacancyViewSet(ModelViewSet):
     queryset = Vacancy.objects.all()
-
-    @action(
-        detail=True,
-        methods=['post'],
-        url_path='favourites/(?P<student_id>\d+)'
-    )
-    def to_favourite(self, request, pk=None, student_id=None):
-        """Добавить студента в избранное вакансии"""
-        vacancy = get_object_or_404(Vacancy, id=student_id)
-        student = get_object_or_404(StudentUser, id=pk)
-        Favourite.objects.create(vacancy=vacancy, student=student)
-        serializer = VacancyCreateFavouriteSerializer(
-                vacancy, context={'request': request}
-            )
-        return Response(serializer.data, status=HTTP_201_CREATED)
-
-    @action(detail=True, methods=['get'])
+ 
+    @action(detail=True)
     def response(self, request, pk=None):
         vacancy = self.get_object()
         serializer = self.get_serializer(vacancy)
         return Response(serializer.data)
-    
-    @action(detail=True, methods=['get'])
-    def favourites(self, request, pk=None):
-        vacancy = self.get_object()
-        serializer = VacancyFavouriteSerializer(
-            vacancy,
-            context={'request': request}
-        )
-        return Response(serializer.data)
 
-    @action(detail=True, methods=['get'])
-    def invitations(self, request, pk=None):
-        vacancy = self.get_object()
-        serializer = self.get_serializer(vacancy)
-        return Response(serializer.data)
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        url_path='favourites/(?P<student_id>\d+)'
+    )
+    def to_favourite(self, request, pk=None, student_id=None):
+        """Добавить студента в избранное вакансии или удалить"""
+        vacancy = get_object_or_404(Vacancy, pk=pk)
+        student = get_object_or_404(StudentUser, pk=student_id)
+        if request.method == 'POST':
+            if Favourite.objects.filter(
+                vacancy=vacancy, student=student
+            ).exists():
+                return Response(
+                    {'errors': 'Студент уже добавлен в избранное'},
+                    status=HTTP_400_BAD_REQUEST
+                )
+            favourite = Favourite.objects.create(
+                vacancy=vacancy, student=student
+            )
+            serializer = VacancyCreateFavouriteSerializer(
+                vacancy, context={'request': request}
+            )
+            return Response(serializer.data, status=HTTP_201_CREATED)
+                
+        if request.method == 'DELETE':
+            favourite = Favourite.objects.filter(
+                vacancy=vacancy, student=student
+            )
+            if favourite.exists():
+                favourite.delete()
+                return Response(status=HTTP_204_NO_CONTENT)
+            else:
+                return Response(
+                    {'errors': 'Студента не было в избранном вакансии'},
+                    status=HTTP_400_BAD_REQUEST)
 
-    def perform_destroy(self, instance):
-        instance.image.delete()
-        instance.delete()
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        url_path='invitations/(?P<student_id>\d+)'
+    )
+    def to_invitation(self, request, pk=None, student_id=None):
+        """Добавить студента в избранное вакансии или удалить"""
+        vacancy = get_object_or_404(Vacancy, pk=pk)
+        student = get_object_or_404(StudentUser, pk=student_id)
+        if request.method == 'POST':
+            if Invitation.objects.filter(
+                vacancy=vacancy, student=student
+            ).exists():
+                return Response(
+                    {'errors': 'Студент уже приглашен'},
+                    status=HTTP_400_BAD_REQUEST
+                )
+            invitation = Invitation.objects.create(
+                vacancy=vacancy, student=student
+            )
+            serializer = VacancyCreateFavouriteSerializer(
+                vacancy, context={'request': request}
+            )
+            return Response(serializer.data, status=HTTP_201_CREATED)
+                
+        if request.method == 'DELETE':
+            invitation = Invitation.objects.filter(
+                vacancy=vacancy, student=student
+            )
+            if invitation.exists():
+                invitation.delete()
+                return Response(status=HTTP_204_NO_CONTENT)
+            else:
+                return Response(
+                    {'errors': 'Студент не был приглашен'},
+                    status=HTTP_400_BAD_REQUEST)
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
-            if self.action == 'response':
-                return VacancyResponseSerializer
-            elif self.action == 'invitations':
-                return VacancyInvitationSerializer
-            elif self.action == 'favourites':
-                return VacancyFavouriteSerializer
-            elif self.action == 'to_favourite':
-                return VacancyCreateFavouriteSerializer
+        #if self.action == 'response':
+            return VacancyResponseSerializer
+        #elif self.action == 'to_favourite':
+        #    return VacancyCreateFavouriteSerializer
         return VacancyCreateSerializer

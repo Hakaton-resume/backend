@@ -1,6 +1,8 @@
 from django.http import HttpResponse
 
+
 def percentage_of_similarity(vacancy_skills, candidate_skills):
+    """Рассчет процента совпадения"""
     vacancy_skills = [skill.name for skill in vacancy_skills]
     candidate_skills = [skill.name for skill in candidate_skills]
 
@@ -10,16 +12,14 @@ def percentage_of_similarity(vacancy_skills, candidate_skills):
         similarity = 100
     else:
         similarity = len(similarity_skills) / len(vacancy_skills) * 100
-    
     return similarity
 
+
 def download_file(content):
+    """Загрузка файла"""
     with open(content.path, 'rb') as file:
         file_extension = content.name.split('.')[-1]
         content_type = f'application/{file_extension}'
         response = HttpResponse(file, content_type=content_type)
         response['Content-Disposition'] = f'attachment; filename="{content.name}"'
         return response
-
-
-        

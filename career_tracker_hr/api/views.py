@@ -15,7 +15,7 @@ from career.models import Vacancy, Skill, Tag, Favourite, Invitation, Resp
 from users.models import StudentUser, Company
 from api.serializers import (VacancyResponseSerializer, StudentSerializer,
                              SkillSerializer, TagSerializer, ResponseSerializer,
-                             VacancyCreateSerializer, StudentSerializer,
+                             VacancyCreateSerializer, StudentSerializer, VacancySerializer,
                              CompanySerializer, VacancyCreateFavouriteSerializer,
                              VacancyFavouriteSerializer, VacancyInvitationSerializer)
 from api.utils import download_file
@@ -185,6 +185,8 @@ class VacancyViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'response':
             return VacancyResponseSerializer
+        elif self.action == 'list' or self.action == 'retrieve':
+            return VacancySerializer
         elif self.action == 'invitations':
             return VacancyInvitationSerializer
         elif self.action == 'favourites':
@@ -194,21 +196,21 @@ class VacancyViewSet(ModelViewSet):
         return VacancyCreateSerializer
 
 
-class ResponseViewSet(ModelViewSet):
-    queryset = Resp.objects.all()
-    serializer_class = ResponseSerializer
- 
-    @action(
-        detail=False,
-        url_path='(?P<vacancy_id>\d+)'
-    )
-    def get_responses(self, request, vacancy_id=None):
-        vacancy = get_object_or_404(Vacancy, pk=vacancy_id)
-        responses = Resp.objects.filter(vacancy=vacancy)
-        serializer = ResponseSerializer(
-            responses,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
+#class ResponseViewSet(ModelViewSet):
+#    queryset = Resp.objects.all()
+#    serializer_class = ResponseSerializer
+# 
+#    @action(
+#        detail=False,
+#        url_path='responses/(?P<vacancy_id>\d+)'
+##    )
+#    def get_responses(self, request, vacancy_id=None):
+#        vacancy = get_object_or_404(Vacancy, pk=vacancy_id)
+#        responses = Resp.objects.filter(vacancy=vacancy)
+#        serializer = ResponseSerializer(
+#            responses,
+#            many=True,
+#            context={'request': request}
+#        )
+#        return Response(serializer.data)
 

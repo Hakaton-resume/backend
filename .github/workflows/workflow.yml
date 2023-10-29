@@ -52,6 +52,7 @@ jobs:
         script: |
           sudo docker compose stop
           sudo docker compose rm career_tracker_hr -sf
+          sudo docker rmi ${{ secrets.BACKEND_IMAGE }}
           echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
           echo DB_NAME=${{ secrets.DB_NAME }} >> .env
           echo DB_USER=${{ secrets.DB_USER }} >> .env

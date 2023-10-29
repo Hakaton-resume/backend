@@ -122,6 +122,22 @@ class VacancyViewSet(ModelViewSet):
                 return Response(
                     {'errors': 'Студента не было в избранном вакансии'},
                     status=HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['patch'])
+    def to_archive(self, request, pk=None):
+        """Добавить вакансию в архив"""
+        vacancy = self.get_object()
+        if vacancy.is_active == True:
+            vacancy.is_active = False
+            vacancy.save()
+            return Response(
+                {'message': 'Вакансия отправлена в архив'}, status=HTTP_200_OK
+            )
+        vacancy.is_active = True
+        vacancy.save()
+        return Response(
+                {'message': 'Вакансия отправлена в архив'}, status=HTTP_200_OK
+            )         
 
     @action(
         detail=True,
@@ -175,7 +191,7 @@ class VacancyViewSet(ModelViewSet):
                 vacancy=vacancy, student=student
             ).delete()
         serializer = VacancyInvitationSerializer(
-            vacancy, context={'request': request}
+            student, context={'request': request}
         )
         return Response(serializer.data, status=HTTP_201_CREATED)
 

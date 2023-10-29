@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator
 from django.db.models import (CASCADE, CharField, DateTimeField,
                               IntegerField, ImageField, ForeignKey,
                               ManyToManyField, Model, SlugField,
-                              TextField, UniqueConstraint)
+                              TextField, UniqueConstraint, OneToOneField)
 
 from users.models import StudentUser, Company, Skill
 from django.utils.timezone import now
@@ -177,6 +177,9 @@ class TagVacancy(Model):
     class Meta:
         verbose_name = 'Тег вакансии'
         verbose_name_plural = 'Теги вакансии'
+        constraints = [
+            UniqueConstraint(fields=('vacancy', 'tag'), name='vacancy_tag')
+        ]
 
     def __str__(self):
         return f'{self.tag} в {self.vacancy}'
@@ -193,7 +196,8 @@ class SkillVacancy(models.Model):
         on_delete=models.CASCADE,
     )
     weight = models.IntegerField(
-        'Вес навыка'
+        'Вес навыка',
+        null=False
     )
 
     def __str__(self):

@@ -179,10 +179,6 @@ class StudentUser(models.Model):
         'Желаемый доход',
         null=True,
     )
-    currency = models.CharField(
-        'Валюта',
-        max_length=50,
-    )
     activities = models.ManyToManyField(
         Activity,
         through='StudentsActivities',
@@ -198,7 +194,7 @@ class StudentUser(models.Model):
     )
 
     def __str__(self):
-        return self.user
+        return self.user.email
 
 
 class StudentsActivities(models.Model):

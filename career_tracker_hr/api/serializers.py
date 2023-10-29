@@ -51,8 +51,18 @@ class StudentSerializer(ModelSerializer):
         return len(activities)
 
 
+class VacancySerializer(ModelSerializer):
+    "Базовый сериализатор для вакансии"
+    tags = TagSerializer(many=True, read_only=True)
+    skills = SkillSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Vacancy
+        fields = '__all__'
+
+
 class StudenShortSerializer(ModelSerializer):
-    """Сериализатор маленькой карточки студента"""
+    """Сериализатор короткой карточки студента"""
     skills = SkillSerializer(many=True, read_only=True)
 
     class Meta:
@@ -67,21 +77,14 @@ class StudenShortSerializer(ModelSerializer):
         ]
 
 
-class ResponseSerializer(ModelSerializer):
-    """Сериализатор откликов"""
+class BaseGroupSerializer(ModelSerializer):
+    """Базовый сериализатор для разны групп студентов в вакансии"""
     student = StudenShortSerializer(read_only=True)
     similarity = SerializerMethodField()
-    is_favourited = SerializerMethodField()
-    is_invited = SerializerMethodField()
-    
+
     class Meta:
         model = Resp
-        fields = [
-            'student',
-            'similarity',
-            'is_favourited',
-            'is_invited',
-        ]
+        fields = '__all__'
         ordering = ['-similarity']
 
     def get_similarity(self, obj):
@@ -97,6 +100,12 @@ class ResponseSerializer(ModelSerializer):
         student_skills = obj.student.skills.all()
         return percentage_of_similarity(skills_with_weigth, student_skills)
 
+
+class ResponseSerializer(BaseGroupSerializer):
+    """Сериализатор для откликов"""
+    is_favourited = SerializerMethodField()
+    is_invited = SerializerMethodField()
+
     def get_is_favourited(self, obj):
         return Favourite.objects.filter(
             vacancy=obj.vacancy, student=obj.student
@@ -108,32 +117,70 @@ class ResponseSerializer(ModelSerializer):
         ).exists()
 
 
-class VacancyResponseSerializer(ModelSerializer):
+class InvitationSerializer(BaseGroupSerializer):
+    """Сериализатор для приглашений"""
+    is_favourited = SerializerMethodField()
+    is_response = SerializerMethodField()
+
+    class Meta:
+        model = Invitation
+        fields = '__all__'
+        ordering = ['-similarity']
+
+    def get_is_favourited(self, obj):
+        return Favourite.objects.filter(
+            vacancy=obj.vacancy, student=obj.student
+        ).exists()
+
+    def get_is_response(self, obj):
+        return Resp.objects.filter(
+            vacancy=obj.vacancy, student=obj.student
+        ).exists()
+
+
+class FavouriteSerializer(BaseGroupSerializer):
+    is_invitation = SerializerMethodField()
+    is_response = SerializerMethodField()
+
+    class Meta:
+        model = Favourite
+        fields = '__all__'
+
+    def get_is_invitation(self, obj):
+        return Invitation.objects.filter(
+            vacancy=obj.vacancy, student=obj.student
+        ).exists()
+
+    def get_is_response(self, obj):
+        return Resp.objects.filter(
+            vacancy=obj.vacancy, student=obj.student
+        ).exists()    
+
+
+class VacancyResponseSerializer(VacancySerializer):
     """Cериализатор для вакансии c откликами"""
-    tags = TagSerializer(many=True, read_only=True)
-    skills = SkillSerializer(many=True, read_only=True)
     response = ResponseSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = Vacancy
-        fields = [
-            'name',
-            'company',
-            'tags',
-            'skills',
-            'response',
-        ]
 
-class StudentToVacancySerializer(ModelSerializer):
-    similarity = SerializerMethodField()
+class VacancyFavouriteSerializer(VacancySerializer):
+    """Сериализатор для вакансий с избранным"""
+    favourites = FavouriteSerializer(many=True, read_only=True)
 
-    class Meta:
-        fields = '__all__'
-        model = StudentUser
 
+class VacancyInvitationSerializer(VacancySerializer):
+    """Сериализатор для вакансий с приглашениями"""
+    invitations = InvitationSerializer(many=True, read_only=True)
+
+
+class VacancyAllSerializer(VacancySerializer):
+    """СЕриализатор для вакансии с откликами, избранными и приглашениями"""
+    response = ResponseSerializer(many=True, read_only=True)
+    favourites = FavouriteSerializer(many=True, read_only=True)
+    invitations = InvitationSerializer(many=True, read_only=True)
 
 
 class CompanySerializer(ModelSerializer):
+    """Сериазизатор для компаний"""
     vacancies = SerializerMethodField()
 
     class Meta:
@@ -147,6 +194,7 @@ class CompanySerializer(ModelSerializer):
 
 
 class SkillWeightSerializer(ModelSerializer):
+    """Сериализатор для навыков с весами в требованиях вакансии"""
     name = CharField()
     weight = IntegerField(write_only=True)
 
@@ -156,20 +204,6 @@ class SkillWeightSerializer(ModelSerializer):
             'weight',
         )
         model = SkillVacancy
-
-
-class VacancySerializer(ModelSerializer):
-    tags = TagSerializer(many=True, read_only=True)
-    skills = SkillSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Vacancy
-        fields = (
-            'name',
-            'company',
-            'tags',
-            'skills',
-        )
 
 
 class VacancyCreateSerializer(ModelSerializer):
@@ -265,102 +299,10 @@ class VacancyCreateSerializer(ModelSerializer):
         return value
 
 
-class FavouriteCreateSerializer(ModelSerializer):
-    student = StudenShortSerializer(read_only=True)
 
-    class Meta:
-        model = Resp
-        fields = [
-            'student',
-        ]
-
-
-class VacancyCreateFavouriteSerializer(ModelSerializer):
-    favourite = FavouriteCreateSerializer(read_only=True)
-
-    class Meta:
-        model = Vacancy
-        fields = [
-            'name',
-            'company',
-            'tags',
-            'skills',
-            'favourite',
-            ]
-
-
-class InvitationSerializer(ModelSerializer):
-    """Сериализатор приглашений"""
-    student = StudenShortSerializer(read_only=True)
-    similarity = SerializerMethodField()
-    is_favourited = SerializerMethodField()
-    
-    class Meta:
-        model = Resp
-        fields = ['student', 'similarity', 'is_favourited']
-
-    def get_similarity(self, obj):
-        vacancy_skills = obj.vacancy.skills.all()
-        skills_with_weigth = []
-        for skill in vacancy_skills:
-            skill_weigth = SkillVacancy.objects.filter(
-                vacancy=obj.vacancy, skill=skill
-            ).first()
-            weight = skill_weigth.weigth
-            skills_with_weigth.append((skill, weight))
-
-        student_skills = obj.student.skills.all()
-        return percentage_of_similarity(skills_with_weigth, student_skills)
-
-
-class FavouriteSerializer(ModelSerializer):
-    student = StudenShortSerializer(read_only=True)
-    similarity = SerializerMethodField()
-
-    class Meta:
-        model = Favourite
-        fields = ['student', 'similarity']
-
-    def get_similarity(self, obj):
-        vacancy_skills = obj.vacancy.skills.all()
-        skills_with_weigth = []
-        for skill in vacancy_skills:
-            skill_weigth = SkillVacancy.objects.filter(
-                vacancy=obj.vacancy, skill=skill
-            ).first()
-            weight = skill_weigth.weigth
-            skills_with_weigth.append((skill, weight))
-
-        student_skills = obj.student.skills.all()
-        return percentage_of_similarity(skills_with_weigth, student_skills)
-
-
-class VacancyFavouriteSerializer(ModelSerializer):
-    favourites = FavouriteSerializer(many=True, read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    skills = SkillSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Vacancy
-        fields = [
-            'name',
-            'company',
-            'tags',
-            'skills',
-            'favourites']
-
-
-class VacancyInvitationSerializer(ModelSerializer):
-    invitations = InvitationSerializer(many=True, read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    skills = SkillSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Vacancy
-        fields = [
-            'name',
-            'company',
-            'tags',
-            'skills',
-            'invitations'
-        ]
+#class StudentToVacancySerializer(ModelSerializer):
+#    similarity = SerializerMethodField()
+#
+#    class Meta:
+#        fields = '__all__'
+#        model = StudentUser

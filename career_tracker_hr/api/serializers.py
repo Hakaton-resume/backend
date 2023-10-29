@@ -232,15 +232,14 @@ class VacancyCreateSerializer(ModelSerializer):
             weight = skill_data['weight']
             name = skill_data['name']
             if Skill.objects.filter(name=name).exists():
-                skill = Skill.objects.get(name=name)
+                skill = Skill.objects.filter(name=name).first()
             else:
                 skill = Skill.objects.create(name=name)
-            vacancy.skills.add(skill)
             SkillVacancy.objects.create( 
                 skill=skill,
                 vacancy=vacancy,
                 weight=weight
-            )  
+        )  
 
     @transaction.atomic
     def create(self, validated_data):
@@ -248,12 +247,13 @@ class VacancyCreateSerializer(ModelSerializer):
         tags = validated_data.pop('tags')
         vacancy = Vacancy.objects.create(**validated_data)
         self.weight_skills(skills, vacancy)
-        for tag in tags:
-            if Tag.objects.filter(name=tag).exists():
-                tag = Tag.objects.get(name=tag)
+        for tag_data in tags:
+            if Tag.objects.filter(name=tag_data).exists():
+                tag = Tag.objects.get(name=tag_data)
             else:
-                tag = Tag.objects.create(name=tag)
-            vacancy.tags.add(tag)
+                tag = Tag.objects.create(name=tag_data)
+            if not vacancy.tags.filter(name=tag_data).exists():
+                vacancy.tags.add(tag)
         return vacancy
 
     @transaction.atomic
@@ -264,13 +264,13 @@ class VacancyCreateSerializer(ModelSerializer):
         instance.skills.clear()
         self.weight_skills(skills, instance)
         instance.tags.clear()
-        for tag in tags: 
-            if Tag.objects.filter(name=tag).exists():
-                tag = Tag.objects.get(name=tag) 
+        for tag_data in tags: 
+            if Tag.objects.filter(name=tag_data).exists():
+                tag = Tag.objects.get(name=tag_data) 
             else: 
-                tag = Tag.objects.create(name=tag)
-            instance.tags.add(tag)
-        
+                tag = Tag.objects.create(name=tag_data)
+            if not instance.tags.filter(name=tag_data).exists():
+                instance.tags.add(tag)
         instance.save()
         return instance
 
@@ -291,10 +291,10 @@ class VacancyCreateSerializer(ModelSerializer):
             if skill in skills:
                 raise ValidationError({
                     'skill': 'Такой навык уже добавлен'
-                })
+            })
             skills.append(skill)
         return value                             
-
+   
     def validate_tags(self, value):
         if not value:
             raise ValidationError({

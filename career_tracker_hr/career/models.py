@@ -170,6 +170,6 @@ class SkillVacancy(models.Model):
         Skill,
         on_delete=models.CASCADE,
     )
-    weigth = models.IntegerField(
+    weight = models.IntegerField(
         'Вес навыка'
     )

@@ -196,7 +196,7 @@ class CompanySerializer(ModelSerializer):
 class SkillWeightSerializer(ModelSerializer):
     """Сериализатор для навыков с весами в требованиях вакансии"""
     name = CharField()
-    weight = IntegerField(write_only=True)
+    weight = IntegerField()
 
     class Meta:
         fields = (
@@ -217,20 +217,20 @@ class VacancyCreateSerializer(ModelSerializer):
 
     @transaction.atomic
     def weight_skills(self, skills, vacancy):
-        for skill in skills:
-            weight = skill['weight']
-            skill = get_object_or_404(Skill, name=skill['name'])
-            if Skill.objects.filter(name=skill).exists():
-                skill = Skill.objects.get(name=skill)
+        for skill_data in skills:
+            weight = skill_data['weight']
+            name = skill_data['name']
+            if Skill.objects.filter(name=name).exists():
+                skill = Skill.objects.get(name=name)
             else:
-                skill = Skill.objects.create(name=skill)
-                vacancy.skills.add(skill)
+                skill = Skill.objects.create(name=name)
+            vacancy.skills.add(skill)
 
-        SkillVacancy.objects.create( 
+            SkillVacancy.objects.create( 
                 skill=skill,
                 vacancy=vacancy,
                 weight=weight
-            )     
+            )  
 
     @transaction.atomic
     def create(self, validated_data):

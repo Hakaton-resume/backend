@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'djoser',
     'drf_yasg',
     'career',
+    'core',
 ]
 
 MIDDLEWARE = [

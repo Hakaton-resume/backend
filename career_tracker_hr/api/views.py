@@ -77,6 +77,7 @@ class StudentViewSet(ModelViewSet):
                 status=HTTP_404_NOT_FOUND
             )
 
+
 class VacancyCreateViewSet(ModelViewSet):
     queryset = Vacancy.objects.all()
     serializer_class = VacancySerializer
@@ -124,6 +125,26 @@ class VacancyViewSet(ModelViewSet):
 
     @action(
         detail=True,
+        methods=['delete'],
+        url_path='response/(?P<student_id>\d+)'
+    )
+    def del_response(self, request, pk=None, student_id=None):
+        """Удалить студента из откликов"""
+        vacancy = get_object_or_404(Vacancy, pk=pk)
+        student = get_object_or_404(StudentUser, pk=student_id)
+        response = Resp.objects.filter(
+                vacancy=vacancy, student=student
+            )
+        if response.exists():
+            response.delete()
+            return Response(status=HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                {'errors': 'Студент не откликался на вакансии'},
+                status=HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
         methods=['post'],
         url_path='invitations/(?P<student_id>\d+)'
     )
@@ -141,6 +162,18 @@ class VacancyViewSet(ModelViewSet):
         Invitation.objects.create(
             vacancy=vacancy, student=student
         )
+        if Favourite.objects.filter(
+            vacancy=vacancy, student=student
+        ).exists():
+            Favourite.objects.filter(
+                vacancy=vacancy, student=student
+            ).delete()
+        if Resp.objects.filter(
+            vacancy=vacancy, student=student
+        ).exists():
+            Resp.objects.filter(
+                vacancy=vacancy, student=student
+            ).delete()
         serializer = VacancyInvitationSerializer(
             vacancy, context={'request': request}
         )
@@ -200,4 +233,3 @@ class VacancyViewSet(ModelViewSet):
         elif self.action == 'list' or self.action == 'retrieve':
             return VacancySerializer
         return VacancyCreateSerializer
-

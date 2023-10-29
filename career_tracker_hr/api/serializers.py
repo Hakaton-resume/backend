@@ -8,7 +8,7 @@ from rest_framework.generics import get_object_or_404
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from api.utils import percentage_of_similarity
+from api.utils import skills_compаration, experience_compаration, percentage_of_similarity
 from career.models import Favourite, Vacancy, Resp, Tag,  SkillVacancy, Invitation
 from users.models import Company, StudentUser, Skill, StudentsActivities
 
@@ -98,7 +98,18 @@ class BaseGroupSerializer(ModelSerializer):
             skills_with_weigth.append((skill, weight))
 
         student_skills = obj.student.skills.all()
-        return percentage_of_similarity(skills_with_weigth, student_skills)
+        skills_similarity = skills_compаration(
+            skills_with_weigth, student_skills
+        )
+        vacancy_experience = obj.vacancy.experience
+        student_experience = obj.student.experience
+        experience_similarity = experience_compаration(
+            vacancy_experience, student_experience
+        )
+        return percentage_of_similarity(
+            skills_similarity, experience_similarity
+        )
+
 
 
 class ResponseSerializer(BaseGroupSerializer):

@@ -90,6 +90,9 @@ class Vacancy(models.Model):
         verbose_name = 'Ваканcия'
         verbose_name_plural = 'Вакансии'
 
+    def __str__(self):
+        return self.name
+
 
 class Invitation(Model):
     """Модель приглашений"""
@@ -107,7 +110,10 @@ class Invitation(Model):
 
     class Meta:
         verbose_name = 'Приглашение'
-        verbose_name_plural = 'Приглашения'        
+        verbose_name_plural = 'Приглашения'
+
+    def __str__(self):
+        return f'{self.student.user} приглашен на {self.vacancy}'
 
 
 class Favourite(Model):
@@ -129,6 +135,9 @@ class Favourite(Model):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 
+    def __str__(self):
+        return f'{self.student.user} в избранном {self.vacancy}'
+
 
 class Resp(Model):
     """Модель откликов на вакансии"""
@@ -147,6 +156,9 @@ class Resp(Model):
     class Meta:
         verbose_name = 'Отклик'
         verbose_name_plural = 'Отклики'
+    
+    def __str__(self):
+        return f'{self.student.user} откликнулся на {self.vacancy}'
 
 
 class TagVacancy(Model):
@@ -166,6 +178,9 @@ class TagVacancy(Model):
         verbose_name = 'Тег вакансии'
         verbose_name_plural = 'Теги вакансии'
 
+    def __str__(self):
+        return f'{self.tag} в {self.vacancy}'
+
 
 class SkillVacancy(models.Model):
     """Модель связи навыков с вакансией с весовыми коэффициентами"""
@@ -180,3 +195,6 @@ class SkillVacancy(models.Model):
     weight = models.IntegerField(
         'Вес навыка'
     )
+
+    def __str__(self):
+        return f'{self.skill} с весом {self.weight} в {self.vacancy}'

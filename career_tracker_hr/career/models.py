@@ -79,6 +79,10 @@ class Vacancy(models.Model):
         through='SkillVacancy',
         verbose_name='Требуемые навыки',
     )
+    is_active = models.BooleanField(
+        'Активность',
+        default=True,
+    )
 
     class Meta:
         verbose_name = 'Ваканcия'

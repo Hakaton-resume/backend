@@ -66,7 +66,7 @@ class Company(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name}'
+        return self.name
 
 
 class Activity(models.Model):
@@ -193,6 +193,9 @@ class StudentUser(models.Model):
         blank=False
     )
 
+    def __str__(self):
+        return self.user
+
 
 class StudentsActivities(models.Model):
     student = models.ForeignKey(
@@ -207,6 +210,9 @@ class StudentsActivities(models.Model):
         related_name='student_activities',
         verbose_name='Активность',
     )
+
+    def __str__(self):
+        return f'{self.student.user} участвовал в {self.activity}'
 
 
 class SkillStudent(models.Model):
@@ -226,6 +232,9 @@ class SkillStudent(models.Model):
     class Meta:
         verbose_name = 'Навык студент'
         verbose_name_plural = 'Навык студент'
+
+    def __str__(self):
+        return f'{self.skills} у {self.student.user}'    
         
 
 class HRUser(models.Model):
@@ -238,9 +247,15 @@ class HRUser(models.Model):
     class Meta:
         ordering = []
 
+    def __str__(self):
+        return self.company
+
 
 class StaffUser(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
     )
+
+    def __str__(self):
+        return self.user

@@ -4,7 +4,6 @@ from api.constants import WEIGHT
 
 def percentage_of_similarity(vacancy_skills, candidate_skills):
     """Рассчет процента совпадения"""
-    print(vacancy_skills)
     vacancy_skills = [(skill[0].name, skill[1]) for skill in vacancy_skills]
     candidate_skills = [skill.name for skill in candidate_skills]
 

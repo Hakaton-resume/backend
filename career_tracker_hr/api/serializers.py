@@ -294,12 +294,3 @@ class VacancyCreateSerializer(ModelSerializer):
                 'tag': 'Теги не могут повторяться'
             })
         return value
-
-
-
-#class StudentToVacancySerializer(ModelSerializer):
-#    similarity = SerializerMethodField()
-#
-#    class Meta:
-#        fields = '__all__'
-#        model = StudentUser

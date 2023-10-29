@@ -34,8 +34,6 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -46,6 +44,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'career_tracker_hr.urls'
 

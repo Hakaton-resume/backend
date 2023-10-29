@@ -77,9 +77,14 @@ class StudentViewSet(ModelViewSet):
                 status=HTTP_404_NOT_FOUND
             )
 
+class VacancyCreateViewSet(ModelViewSet):
+    queryset = Vacancy.objects.all()
+    serializer_class = VacancySerializer
+
+
 class VacancyViewSet(ModelViewSet):
     queryset = Vacancy.objects.all()
- 
+
     @action(
         detail=True,
         methods=['post', 'delete'],

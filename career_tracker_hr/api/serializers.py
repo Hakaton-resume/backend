@@ -94,7 +94,7 @@ class BaseGroupSerializer(ModelSerializer):
             skill_weigth = SkillVacancy.objects.filter(
                 vacancy=obj.vacancy, skill=skill
             ).first()
-            weight = skill_weigth.weigth
+            weight = skill_weigth.weight
             skills_with_weigth.append((skill, weight))
 
         student_skills = obj.student.skills.all()
@@ -225,7 +225,6 @@ class VacancyCreateSerializer(ModelSerializer):
             else:
                 skill = Skill.objects.create(name=name)
             vacancy.skills.add(skill)
-
             SkillVacancy.objects.create( 
                 skill=skill,
                 vacancy=vacancy,
@@ -238,7 +237,6 @@ class VacancyCreateSerializer(ModelSerializer):
         tags = validated_data.pop('tags')
         vacancy = Vacancy.objects.create(**validated_data)
         self.weight_skills(skills, vacancy)
-
         for tag in tags:
             if Tag.objects.filter(name=tag).exists():
                 tag = Tag.objects.get(name=tag)
@@ -255,7 +253,6 @@ class VacancyCreateSerializer(ModelSerializer):
         instance.skills.clear()
         self.weight_skills(skills, instance)
         instance.tags.clear()
-
         for tag in tags: 
             if Tag.objects.filter(name=tag).exists():
                 tag = Tag.objects.get(name=tag) 

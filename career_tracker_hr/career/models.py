@@ -10,6 +10,7 @@ from django.utils.timezone import now
 
 
 class Tag(Model):
+    """Модель тега"""
     name = CharField(
         max_length=64,
         unique=True,
@@ -25,6 +26,7 @@ class Tag(Model):
 
 
 class Vacancy(models.Model):
+    """Модель вакансии"""
     company = models.ForeignKey(
         'users.Company',
         on_delete=models.CASCADE,
@@ -89,7 +91,27 @@ class Vacancy(models.Model):
         verbose_name_plural = 'Вакансии'
 
 
+class Invitation(Model):
+    """Модель приглашений"""
+    student = ForeignKey(
+        StudentUser,
+        on_delete=CASCADE,
+        verbose_name='Студент'
+    )
+    vacancy = ForeignKey(
+        Vacancy,
+        on_delete=CASCADE,
+        verbose_name='Вакансия',
+        related_name='invitations'
+    )
+
+    class Meta:
+        verbose_name = 'Приглашение'
+        verbose_name_plural = 'Приглашения'        
+
+
 class Favourite(Model):
+    """Модель избранного вакансии"""
     student = ForeignKey(
         StudentUser,
         on_delete=CASCADE,
@@ -109,6 +131,7 @@ class Favourite(Model):
 
 
 class Resp(Model):
+    """Модель откликов на вакансии"""
     student = ForeignKey(
         StudentUser,
         on_delete=CASCADE,
@@ -118,7 +141,7 @@ class Resp(Model):
         Vacancy,
         on_delete=CASCADE,
         verbose_name='Вакансия',
-        related_name='responses'
+        related_name='response'
     )
 
     class Meta:
@@ -127,6 +150,7 @@ class Resp(Model):
 
 
 class TagVacancy(Model):
+    """Модель связи тегов с вакансией"""
     tag = ForeignKey(
         Tag,
         on_delete=CASCADE,
@@ -143,25 +167,8 @@ class TagVacancy(Model):
         verbose_name_plural = 'Теги вакансии'
 
 
-class Invitation(Model):
-    student = ForeignKey(
-        StudentUser,
-        on_delete=CASCADE,
-        verbose_name='Студент'
-    )
-    vacancy = ForeignKey(
-        Vacancy,
-        on_delete=CASCADE,
-        verbose_name='Вакансия',
-        related_name='invitation'
-    )
-
-    class Meta:
-        verbose_name = 'Приглашение'
-        verbose_name_plural = 'Приглашения'
-
-
 class SkillVacancy(models.Model):
+    """Модель связи навыков с вакансией с весовыми коэффициентами"""
     vacancy = models.ForeignKey(
         Vacancy,
         on_delete=models.CASCADE,

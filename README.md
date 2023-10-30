@@ -24,12 +24,12 @@
 [![GitHub%20Actions](https://img.shields.io/badge/-GitHub%20Actions-464646?style=flat-square&logo=GitHub%20actions)](https://github.com/features/actions)
 
 #### PM:
-- Боброва Анастасия
+- [Боброва Анастасия](https://github.com/bobrova93)
 
 #### Команда дизайнеров
 - Дзюба Владислав
 - Ламтюгина Александра
-- Синицкая Анна
+- [Синицкая Анна](https://github.com/Sinitskayaya)
 
 #### Команда fromtend-разработчиков
 - [Карпов Кирилл](https://github.com/RinVeber)
@@ -41,15 +41,41 @@
 - [Бескровный Борис](https://github.com/beskrovniibv)
 - [Пашкова Юлия](https://github.com/Jullitka)
 
-Под чутким руководством:
-- Насти
+## Запуск проекта
 
-Проект работает https://career-tracker.duckdns.org  
+#### Клонируйте репозиторий
+```
+https://github.com/Hakaton-resume/backend/tree/main
+```
+#### Создайте файл содержащий переменные виртуального окружения .env на примере .env.example
+```
+SECRET_KEY = <Секретный ключ>
+DB_ENGINE=<django.db.backends.postgresql>
+DB_NAME=<имя базы данных postgres>
+DB_USER=<пользователь бд>
+DB_PASSWORD=<пароль>
+DB_HOST=<db>
+DB_PORT=<5432>
+```
+#### Разверните контейнеры из папки infra и выполните миграции
+```
+sudo docker-compose up -d --build
+sudo docker-compose exec backend python manage.py migrate
+```
+#### Создайте суперюзера
+```
+sudo docker-compose exec backend python manage.py createsuperuser
+```
+####  Cоберите статику
+```
+sudo docker-compose exec backend python manage.py collectstatic
+```
+#### Проект доступен по адресу https://career-tracker.duckdns.org  
+
+## Документация
+
 Swagger https://career-tracker.duckdns.org/swagger/  
 Redoc https://career-tracker.duckdns.org/redoc/  
-django + django-rest-framework + djoser + simpleJWT  
-Запущено в контейнерах docker: django + postgresql + nginx, ssl ключи получены через certbot в контейнере.  
-API авторизации + APIv1 доступа к данным  
 
 
-16-31 октября 2023 года
+19 - 31 октября 2023 года

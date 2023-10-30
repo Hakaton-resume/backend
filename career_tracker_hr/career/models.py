@@ -6,7 +6,7 @@ from django.db.models import (CASCADE, CharField, DateTimeField,
                               TextField, UniqueConstraint, OneToOneField)
 
 from users.models import StudentUser, Company, Skill
-from django.utils.timezone import now
+from django.utils import timezone
 
 
 class Tag(Model):
@@ -44,7 +44,7 @@ class Vacancy(models.Model):
     )
     pub_date = models.DateField(
         'Дата публикации',
-        default=now,
+        default=timezone.now().date(),
     )
     name = models.CharField(
         'Название',

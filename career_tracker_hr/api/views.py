@@ -11,14 +11,14 @@ from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
                                         PrimaryKeyRelatedField, ImageField)
 from django.http import HttpResponse
 
-from career.models import Vacancy, Skill, Tag, Favourite, Invitation, Resp
+from career.models import Vacancy, Skill, Tag, Favourite, Invitation, Resp, SkillVacancy
 from users.models import StudentUser, Company
-from api.serializers import (VacancyResponseSerializer, StudentSerializer, InvitationSerializer,
+from api.serializers import (VacancyResponseSerializer, StudentVacancySerializer, InvitationSerializer,
                              SkillSerializer, TagSerializer, ResponseSerializer,
                              VacancyCreateSerializer, StudentSerializer, VacancySerializer,
                              CompanySerializer, VacancyAllSerializer, FavouriteSerializer,
                              VacancyFavouriteSerializer, VacancyInvitationSerializer)
-from api.utils import download_file
+from api.utils import download_file, experience_compаration, skills_compаration, percentage_of_similarity
 from api.filters import SkillFilter, TagFilter
 
 
@@ -214,7 +214,7 @@ class VacancyViewSet(ModelViewSet):
             context={'request': request}
         )
         return Response(serializer.data)
-    
+
     @action(detail=True)
     def favourites(self, request, pk=None):
         vacancy = self.get_object()
@@ -237,13 +237,135 @@ class VacancyViewSet(ModelViewSet):
         )
         return Response(serializer.data)
 
+    @action(
+        detail=True,
+        url_path='favourites/(?P<student_id>\d+)'
+    )
+    def favourite(self, request, pk=None, student_id=None):
+        vacancy = self.get_object()
+        student = get_object_or_404(StudentUser, pk=student_id)
+        if Favourite.objects.filter(vacancy=vacancy, student=student).exists():
+            favourite = Favourite.objects.filter(
+                vacancy=vacancy, student=student
+            ).first()
+            serializer = FavouriteSerializer(
+                favourite,
+                context={'request': request}
+            )
+            return Response(serializer.data)
+        return Response(
+                {'errors': 'Студента нет в избранном'},
+                status=HTTP_400_BAD_REQUEST
+        )
+
+    @action(
+        detail=True,
+        url_path='students/(?P<student_id>\d+)'
+    )
+    def student(self, request, pk=None, student_id=None):
+        vacancy = self.get_object()
+        student = get_object_or_404(StudentUser, pk=student_id)
+        vacancy_skills = vacancy.skills.all()
+        skills_with_weigth = []
+        for skill in vacancy_skills:
+            skill_weigth = SkillVacancy.objects.filter(
+                vacancy=vacancy, skill=skill
+            ).first()
+            weight = skill_weigth.weight
+            skills_with_weigth.append((skill, weight))
+
+        student_skills = student.skills.all()
+        skills_similarity = skills_compаration(
+            skills_with_weigth, student_skills
+        )
+        vacancy_experience = vacancy.experience
+        student_experience = student.experience
+        experience_similarity = experience_compаration(
+            vacancy_experience, student_experience
+        )
+        similarity = percentage_of_similarity(
+            skills_similarity, experience_similarity
+        )
+        serializer = StudentSerializer(
+            student,
+            context={'request': request},
+            data={'similarity': similarity},
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def students(self, request, pk=None):
+        """Список всех соискателей с процентом совпадения с вакансией"""
+        vacancy = self.get_object()
+        students = StudentUser.objects.all()
+        vacancy_skills = vacancy.skills.all()
+        skills_with_weight = []
+        for skill in vacancy_skills:
+            skill_weight = SkillVacancy.objects.filter(
+                vacancy=vacancy, skill=skill
+            ).first()
+            weight = skill_weight.weight
+            skills_with_weight.append((skill, weight))
+        vacancy_experience = vacancy.experience
+
+        response_data = []
+
+        for student in students:
+            student_skills = student.skills.all()
+            skills_similarity = skills_compаration(
+                skills_with_weight,
+                student_skills
+            )
+            student_experience = student.experience
+            experience_similarity = experience_compаration(
+                vacancy_experience,
+                student_experience
+            )
+            similarity = percentage_of_similarity(
+                skills_similarity,
+                experience_similarity
+            )
+            if Favourite.objects.filter(vacancy=vacancy, student=student).exists():
+                is_favourited = True
+            else:
+                is_favourited = False
+            if Resp.objects.filter(vacancy=vacancy, student=student).exists():
+                is_response = True
+            else:
+                is_response = False
+            if Invitation.objects.filter(vacancy=vacancy, student=student).exists():
+                is_invitation = True
+            else:
+                is_invitation = False
+            serializer = StudentVacancySerializer(
+                student, 
+                context={'request': request},
+                data={
+                    'similarity': similarity,
+                    'is_favourited': is_favourited,
+                    'is_response': is_response,
+                    'is_invitation': is_invitation
+                },
+                partial=True,
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            response_data.append(serializer.data)
+
+        return Response(response_data)
+
     def get_serializer_class(self):
         if self.action == 'response':
             return ResponseSerializer
-        elif self.action == ('invitations', 'to_invitation'):
+        elif self.action == ('invitations', 'to_invitation', ''):
             return InvitationSerializer
         elif self.action in ('favourites', 'to_favourite'):
             return FavouriteSerializer
+        elif self.action in ('student', 'students'):
+            return StudentVacancySerializer
         elif self.action == 'groups':
             return VacancyAllSerializer
         elif self.action == 'list' or self.action == 'retrieve':

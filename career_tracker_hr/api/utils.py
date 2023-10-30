@@ -24,26 +24,32 @@ def skills_compаration(vacancy_skills, candidate_skills):
 
 def experience_compаration(vacancy_experience, student_experience):
     """Сравнение требуемого в вакансии опыта и опыта соискателя"""
-    required_experience = EXPERIENCE[vacancy_experience]
-    if required_experience[0] <= int(student_experience) <= required_experience[1]:
-        return 1
-    elif required_experience[0] > int(student_experience):
-        return 0
-    return 0.9
-
-    #if vacancy_experience == student_experience:
-    #    return 1
-    #elif vacancy_experience < student_experience:
-    #    return 0.9
-    #return 0
+    try:
+        required_experience = EXPERIENCE[vacancy_experience]
+        if required_experience[0] <= int(student_experience) <= required_experience[1]:
+            return 1
+        elif required_experience[0] > int(student_experience):
+            return 0
+        return 0.9
+    except KeyError:
+        try:
+            if vacancy_experience == student_experience:
+                return 1
+            elif vacancy_experience < student_experience:
+                return 0.9
+            return 0
+        except:
+            return None
 
 
 def percentage_of_similarity(*args):
+    """Рассчет процента совпадений"""
     count = 0
     sum_args = 0
     for arg in args:
-        count += 1
-        sum_args += arg
+        if arg is not None:
+            count += 1
+            sum_args += arg
     return round(sum_args / count * 100)
 
 

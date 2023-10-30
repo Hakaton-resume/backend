@@ -1,7 +1,7 @@
 import base64
 from rest_framework.serializers import (ModelSerializer, SerializerMethodField, ListField,
                                         ImageField, CharField,
-                                        IntegerField)
+                                        IntegerField, BooleanField)
 from django.core.files.base import ContentFile
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.generics import get_object_or_404
@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError
 
 from api.utils import skills_compаration, experience_compаration, percentage_of_similarity
 from career.models import Favourite, Vacancy, Resp, Tag,  SkillVacancy, Invitation
-from users.models import Company, StudentUser, Skill, StudentsActivities
+from users.models import Company, StudentUser, Skill, StudentsActivities, User
 
 
 class Base64ImageField(ImageField):
@@ -41,7 +41,10 @@ class StudentSerializer(ModelSerializer):
     """Сериализатор для студентов"""
     skills = SkillSerializer(many=True, read_only=True)
     activities = SerializerMethodField()
-
+    last_name = SerializerMethodField()
+    first_name = SerializerMethodField()
+    photo = Base64ImageField()
+    
     class Meta:
         model = StudentUser
         fields = '__all__'
@@ -49,6 +52,27 @@ class StudentSerializer(ModelSerializer):
     def get_activities(self, obj):
         activities = StudentsActivities.objects.filter(student=obj)
         return len(activities)
+
+    def get_last_name(self, obj):
+        user = get_object_or_404(User, email=obj.user)
+        return user.last_name
+
+    def get_first_name(self, obj):
+        user = get_object_or_404(User, email=obj.user)
+        return user.first_name
+
+
+class StudentVacancySerializer(StudentSerializer):
+    """Сериализатор для студентов в вакансии"""
+    similarity = IntegerField()
+    is_response = BooleanField()
+    is_favourited = BooleanField()
+    is_invitation = BooleanField()
+
+    class Meta:
+        model = StudentUser
+        fields = '__all__'
+        ordering = ['-similarity']
 
 
 class VacancySerializer(ModelSerializer):
@@ -61,25 +85,25 @@ class VacancySerializer(ModelSerializer):
         fields = '__all__'
 
 
-class StudenShortSerializer(ModelSerializer):
+class StudenShortSerializer(StudentSerializer):
     """Сериализатор короткой карточки студента"""
-    skills = SkillSerializer(many=True, read_only=True)
 
     class Meta:
         model = StudentUser
         fields = [
-            'user',
+            'last_name',
+            'first_name',
             'photo',
             'location',
             'position',
             'experience',
-            'skills'
+            'skills',
         ]
 
 
 class BaseGroupSerializer(ModelSerializer):
     """Базовый сериализатор для разны групп студентов в вакансии"""
-    student = StudenShortSerializer(read_only=True)
+    student = StudentSerializer(read_only=True)
     similarity = SerializerMethodField()
 
     class Meta:
@@ -109,7 +133,6 @@ class BaseGroupSerializer(ModelSerializer):
         return percentage_of_similarity(
             skills_similarity, experience_similarity
         )
-
 
 
 class ResponseSerializer(BaseGroupSerializer):

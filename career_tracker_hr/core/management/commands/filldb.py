@@ -83,7 +83,7 @@ class Command(base.BaseCommand):
             )
             skill.save()
 
-        for _ in range(50):
+        for _ in range(10):
             a = choice(['m', 'f'])
             lastname, firstname, surname = choice(LNAMES[a]), choice(NAMES[a]), choice(SURNAMES[a])
             login = getlogin(lastname, firstname, surname)
@@ -203,7 +203,7 @@ class Command(base.BaseCommand):
                 )
                 skill_students.save()
 
-        for _ in range(50):
+        for _ in range(5):
             company = choice(SAMPLE_COMPANIES)
             company_name = company
             company_info = COMPANIES[company]['description']

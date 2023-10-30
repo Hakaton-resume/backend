@@ -83,7 +83,6 @@ class Command(base.BaseCommand):
             )
             skill.save()
 
-
         for _ in range(50):
             a = choice(['m', 'f'])
             lastname, firstname, surname = choice(LNAMES[a]), choice(NAMES[a]), choice(SURNAMES[a])
@@ -238,6 +237,18 @@ class Command(base.BaseCommand):
             tags = TAGS.copy()
             shuffle(tags)
             tags = tags[:randint(0, 4)]
+            salary = choice([12_000, 25_000, 50_000, 100_000])
+            currency = choice(['RUR', 'USD', 'EUR', 'RMB', 'TRY'])
+            if currency == 'USD':
+                salary = salary // 92
+            elif currency == 'EUR':
+                salary = salary // 98
+            elif currency == 'RMB':
+                salary = salary // 12
+            elif currency == 'TRY':
+                salary = salary // 3
+            else:
+                pass
             vacancy = Vacancy(
                 company=Company.objects.get(name=company),
                 company_name=company_name,
@@ -249,6 +260,8 @@ class Command(base.BaseCommand):
                 form=form,
                 reject_letter=reject,
                 responsibilities=responsibilities,
+                salary=salary,
+                currency=currency,
                 additional_info='А ещё у нас вкусные печеньки.' if randint(0, 10) == 0 else ''
             )
             vacancy.save()

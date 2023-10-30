@@ -8,9 +8,10 @@ from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.core.management import base
 
-from .fixtures import NAMES, SURNAMES, LNAMES, LOCATIONS, CAREERS, BRIEFS, SKILLS, JOBS, UNIVERCITIES, COURSES, ACTIVITIES
+from .fixtures import NAMES, SURNAMES, LNAMES, LOCATIONS, CAREERS, BRIEFS, SKILLS, JOBS, UNIVERCITIES, COURSES, ACTIVITIES, COMPANIES, VACANCIES, DEALS, TAGS, REJECTS, SAMPLE_COMPANIES
 
-from users.models import Activity, Skill, StudentUser, StudentsActivities, SkillStudent
+from users.models import Activity, Skill, StudentUser, StudentsActivities, SkillStudent, Company
+from career.models import Tag, Vacancy, TagVacancy, SkillVacancy
 
 
 User = get_user_model()
@@ -48,12 +49,40 @@ class Command(base.BaseCommand):
 
         Activity.objects.all().delete()
         Skill.objects.all().delete()
+        Company.objects.all().delete()
+        Tag.objects.all().delete()
+        User.objects.all().exclude(email='admin@site.com').delete()
+
 
         for a in ACTIVITIES:
             activity = Activity(
                 name=a
             )
             activity.save()
+
+        for t in TAGS:
+            tag = Tag(
+                name=t,
+            )
+            tag.save()
+
+        for c in COMPANIES:
+            company = Company(
+                name=c
+            )
+            company.save()
+        
+        skills = set()
+        for a in SKILLS.keys():
+            for b in SKILLS[a]:
+                skills.update(SKILLS[a][b])
+        skills = list(skills)
+        for s in skills:
+            skill = Skill(
+                name=s
+            )
+            skill.save()
+
 
         for _ in range(50):
             a = choice(['m', 'f'])
@@ -68,12 +97,21 @@ class Command(base.BaseCommand):
             job = choice(JOBS[carrer])
             brief = choice(BRIEFS[carrer])
             skills = []
-            for _ in range(choice([1, 2])):
-                skills.append(choice(SKILLS['critical'][carrer]))
-            for _ in range(choice([0, 1, 2])):
-                skills.append(choice(SKILLS['important'][carrer]))
-            for _ in range(choice([0, 1, 2])):
-                skills.append(choice(SKILLS['optional'][carrer]))
+            critical_skills = SKILLS['critical'][carrer].copy()
+            important_skills = SKILLS['important'][carrer].copy()
+            optional_skills = SKILLS['optional'][carrer].copy()
+            shuffle(critical_skills)
+            shuffle(important_skills)
+            shuffle(optional_skills)
+            skills += critical_skills[:choice([1, 2])]
+            skills += important_skills[:randint(0, 2)]
+            skills += optional_skills[:randint(0, 2)]
+            # for _ in range(choice([1, 2])):
+                # skills.append(choice(SKILLS['critical'][carrer]))
+            # for _ in range(choice([0, 1, 2])):
+            #     skills.append(choice(SKILLS['important'][carrer]))
+            # for _ in range(choice([0, 1, 2])):
+            #     skills.append(choice(SKILLS['optional'][carrer]))
             phone = f'+7{randint(900, 999)}{randint(1,9999999):07}'
             telegram = f'@{login.split("@")[0]}'
             letter = Path(os.path.join(settings.BASE_DIR, 'core/management/commands/data/letter.pdf'))
@@ -99,8 +137,6 @@ class Command(base.BaseCommand):
             print(f'{format}')
             print(f'{experience}')
             print('*'*10)
-
-            
 
             user = User(
                 first_name=f'{firstname} {surname}',
@@ -158,4 +194,69 @@ class Command(base.BaseCommand):
                     student=student
                 )
                 skill_students.save()
-        pass
+
+        for _ in range(50):
+            company = choice(SAMPLE_COMPANIES)
+            company_name = company
+            company_info = COMPANIES[company]['description']
+            location = choice(LOCATIONS)
+            career = choice(CAREERS)
+            name = choice(JOBS[career])
+            experience = choice([0, 6, 12, 24, 36])
+            form = choice(['удаленно', 'гибрид', 'офис'])
+            description = choice(VACANCIES[career])
+            responsibilities = choice(DEALS[career])
+            reject = choice(REJECTS)
+            skills = {
+                'critical': [],
+                'important': [],
+                'optional': [],
+            }
+            for _ in range(choice([1, 2])):
+                skills['critical'].append(choice(SKILLS['critical'][career]))
+            for _ in range(choice([0, 1, 2])):
+                skills['important'].append(choice(SKILLS['important'][career]))
+            for _ in range(choice([0, 1, 2])):
+                skills['optional'].append(choice(SKILLS['optional'][career]))
+            tags = TAGS.copy()
+            shuffle(tags)
+            tags = tags[:randint(0, 4)]
+            vacancy = Vacancy(
+                company=Company.objects.get(name=company),
+                company_name=company_name,
+                company_info=company_info,
+                location=location,
+                name=name,
+                experience=experience,
+                description=description,
+                form=form,
+                reject_letter=reject,
+                responsibilities=responsibilities,
+                additional_info='А ещё у нас вкусные печеньки.' if randint(0, 10) == 0 else ''
+            )
+            vacancy.save()
+            for t in tags:
+                tag = Tag.objects.get(name=t)
+                tag_in_vacancy = TagVacancy(
+                    tag=tag,
+                    vacancy=vacancy
+                )
+                tag_in_vacancy.save()
+            for w in skills.keys():
+                for s in skills[w]:
+                    skill = Skill.objects.get(name=s)
+                    if w == 'critical':
+                        weight = 1
+                    elif w == 'important':
+                        weight = 2
+                    elif w == 'optional':
+                        weight = 3
+                    else:
+                        weight = 0
+                    skill_in_vacancy = SkillVacancy(
+                        vacancy=vacancy,
+                        skill=skill,
+                        weight=weight,
+                    )
+                    skill_in_vacancy.save()
+            pass

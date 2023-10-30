@@ -1,24 +1,23 @@
-from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
-from rest_framework.decorators import action
-from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_200_OK,
-                                   HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND)
+from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
+                                   HTTP_200_OK, HTTP_400_BAD_REQUEST,
+                                   HTTP_404_NOT_FOUND)
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
-                                        PrimaryKeyRelatedField, ImageField)
-from django.http import HttpResponse
-from rest_framework.pagination import PageNumberPagination
-from career.models import Vacancy, Skill, Tag, Favourite, Invitation, Resp, SkillVacancy
+
+from career.models import (Vacancy, Skill, Tag, Favourite,
+                           Invitation, Resp, SkillVacancy)
 from users.models import StudentUser, Company
-from api.serializers import (VacancyResponseSerializer, StudentVacancySerializer, InvitationSerializer,
-                             SkillSerializer, TagSerializer, ResponseSerializer,
-                             VacancyCreateSerializer, StudentSerializer, VacancySerializer,
-                             VacancyAllSerializer, FavouriteSerializer,
-                             VacancyFavouriteSerializer, VacancyInvitationSerializer)
-from api.utils import download_file, experience_compаration, skills_compаration, percentage_of_similarity
+from api.serializers import (InvitationSerializer, StudentVacancySerializer,
+                             SkillSerializer, TagSerializer,
+                             ResponseSerializer, VacancyCreateSerializer,
+                             StudentSerializer, VacancySerializer,
+                             VacancyAllSerializer, FavouriteSerializer)
+from api.utils import (download_file, experience_compаration,
+                       skills_compаration, percentage_of_similarity)
 from api.filters import SkillFilter, TagFilter
 
 
@@ -57,7 +56,6 @@ class StudentViewSet(ModelViewSet):
                 {'detail': 'Резюме не найдено'},
                 status=HTTP_404_NOT_FOUND
             )
-
 
     @action(detail=True)
     def download_portfolio(self, request, pk=None):
@@ -99,7 +97,7 @@ class VacancyViewSet(ModelViewSet):
                 favourite, context={'request': request}
             )
             return Response(serializer.data, status=HTTP_201_CREATED)
-                
+
         if request.method == 'DELETE':
             favourite = Favourite.objects.filter(
                 vacancy=vacancy, student=student
@@ -111,12 +109,12 @@ class VacancyViewSet(ModelViewSet):
                 return Response(
                     {'errors': 'Студента не было в избранном вакансии'},
                     status=HTTP_400_BAD_REQUEST)
-    
+
     @action(detail=True, methods=['patch'])
     def to_archive(self, request, pk=None):
         """Добавить вакансию в архив"""
         vacancy = self.get_object()
-        if vacancy.is_active == True:
+        if vacancy.is_active is True:
             vacancy.is_active = False
             vacancy.save()
             return Response(
@@ -126,7 +124,7 @@ class VacancyViewSet(ModelViewSet):
         vacancy.save()
         return Response(
                 {'message': 'Вакансия отправлена в архив'}, status=HTTP_200_OK
-            )         
+            )
 
     @action(
         detail=True,
@@ -195,6 +193,7 @@ class VacancyViewSet(ModelViewSet):
 
     @action(detail=True)
     def response(self, request, pk=None):
+        """Отклики на вакансию"""
         vacancy = self.get_object()
         responses = Resp.objects.filter(vacancy=vacancy)
         serializer = ResponseSerializer(
@@ -206,6 +205,7 @@ class VacancyViewSet(ModelViewSet):
 
     @action(detail=True)
     def favourites(self, request, pk=None):
+        """Избранное вакансии"""
         vacancy = self.get_object()
         favourites = Favourite.objects.filter(vacancy=vacancy)
         serializer = FavouriteSerializer(
@@ -217,6 +217,7 @@ class VacancyViewSet(ModelViewSet):
 
     @action(detail=True)
     def invitations(self, request, pk=None):
+        """Приглашенные на собеседование"""
         vacancy = self.get_object()
         invitations = Invitation.objects.filter(vacancy=vacancy)
         serializer = InvitationSerializer(
@@ -232,11 +233,12 @@ class VacancyViewSet(ModelViewSet):
         url_path='favourites/(?P<student_id>\d+)'
     )
     def favourite(self, request, pk=None, student_id=None):
+        """Добавить в избранное"""
         vacancy = get_object_or_404(Vacancy, pk=pk)
         student = get_object_or_404(StudentUser, pk=student_id)
         if Favourite.objects.filter(vacancy=vacancy, student=student).exists():
             return Response(
-                {'errors': 'Студент уже избранном'},
+                {'errors': 'Студент уже в избранном'},
                 status=HTTP_400_BAD_REQUEST
             )
         favourite = Favourite.objects.create(
@@ -253,6 +255,7 @@ class VacancyViewSet(ModelViewSet):
         url_path='students/(?P<student_id>\d+)'
     )
     def student(self, request, pk=None, student_id=None):
+        """Данные студенты в сравнении с вакансией"""
         vacancy = get_object_or_404(Vacancy, pk=pk)
         student = get_object_or_404(StudentUser, pk=student_id)
         vacancy_skills = vacancy.skills.all()
@@ -350,7 +353,9 @@ class VacancyViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             response_data.append(serializer.data)
-
+        response_data = sorted(
+            response_data, key=lambda x: x['similarity'], reverse=True
+        )
         return Response(response_data)
 
     def perform_create(self, serializer):

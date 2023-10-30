@@ -38,7 +38,7 @@ def experience_compаration(vacancy_experience, student_experience):
             elif vacancy_experience < student_experience:
                 return 0.9
             return 0
-        except:
+        except Exception:
             return None
 
 

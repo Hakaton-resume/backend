@@ -234,8 +234,8 @@ class SkillStudent(models.Model):
         verbose_name_plural = 'Навык студент'
 
     def __str__(self):
-        return f'{self.skills} у {self.student.user}'    
-        
+        return f'{self.skills} у {self.student.user}'
+
 
 class HRUser(models.Model):
     company = models.ManyToManyField(Company)

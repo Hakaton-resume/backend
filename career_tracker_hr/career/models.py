@@ -60,6 +60,15 @@ class Vacancy(models.Model):
     responsibilities = models.TextField(
         'Обязанности',
     )
+    salary = models.IntegerField(
+        'Заработная плата',
+        null=True, blank=True
+    )
+    currency = models.CharField(
+        'Валюта',
+        null=True, blank=True,
+        max_length=32
+    )
     form = models.CharField(
         'Форма работы',
         max_length=32,

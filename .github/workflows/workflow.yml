@@ -50,7 +50,8 @@ jobs:
         username: ${{ secrets.SSH_HOST_USER }}
         key: ${{ secrets.SSH_HOST_PUBLIC }}
         script: |
-          sudo docker compose stop
+          sudo docker pull ${{ secrets.BACKEND_IMAGE }}
+          sudo docker compose stop career_tracker_hr
           sudo docker compose rm career_tracker_hr -sf
           sudo docker rmi ${{ secrets.BACKEND_IMAGE }}
           echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
@@ -65,7 +66,7 @@ jobs:
           echo POSTGRES_DB=${{ secrets.DB_NAME }} > .postgresql
           echo POSTGRES_USER=${{ secrets.DB_USER }} >> .postgresql
           echo POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} >> .postgresql
-          sudo docker compose up -d
+          sudo docker compose start career_tracker_hr
           # sudo docker compose exec career_tracker_hr python manage.py makemigrations
           sudo docker compose exec career_tracker_hr python manage.py migrate
           # sudo docker compose exec career_tracker_hr python manage.py createsuperuser --no-input --email ${{ secrets.DJANGO_SUPERUSER_EMAIL }}

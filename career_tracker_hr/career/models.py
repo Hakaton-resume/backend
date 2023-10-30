@@ -28,7 +28,7 @@ class Tag(Model):
 class Vacancy(models.Model):
     """Модель вакансии"""
     company = models.ForeignKey(
-        Company,
+        'users.Company',
         on_delete=models.CASCADE,
     )
     company_name = models.CharField(

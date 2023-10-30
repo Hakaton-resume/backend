@@ -70,3 +70,4 @@ jobs:
           sudo docker compose exec career_tracker_hr python manage.py migrate
           sudo docker compose exec career_tracker_hr python manage.py createsuperuser --no-input --email ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
           sudo docker compose exec career_tracker_hr python manage.py collectstatic --no-input
+          sudo docker compose exec career_tracker_hr python manage.py filldb

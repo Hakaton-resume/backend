@@ -353,9 +353,6 @@ class VacancyViewSet(ModelViewSet):
 
         return Response(response_data)
 
-    def perform_create(self, serializer):
-        serializer.save(company=Company.objects.first())
-
     def get_serializer_class(self):
         if self.action == 'response':
             return ResponseSerializer

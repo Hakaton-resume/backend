@@ -122,7 +122,16 @@ class Command(base.BaseCommand):
             course_year = 2023 - randint(0, 3)
             level = choice(['junior', 'middle'])
             format = choice(['удаленно', 'гибрид', 'офис'])
-            experience = choice([0, 6, 12, 24, 36])
+            seed = randint(1, 25)
+            if seed < 2:
+                experience = 'более 6 лет'
+            elif seed < 5:
+                experience = '3-6 лет'
+            elif seed < 10:
+                experience = '1-3 года'
+            else:
+                experience = 'до 1 года'
+            # experience = choice([0, 6, 12, 24, 36])
             salary = choice([12_000, 25_000, 50_000, 100_000])
 
             print('*'*10)
@@ -202,7 +211,15 @@ class Command(base.BaseCommand):
             location = choice(LOCATIONS)
             career = choice(CAREERS)
             name = choice(JOBS[career])
-            experience = choice([0, 6, 12, 24, 36])
+            # experience = choice([0, 6, 12, 24, 36])
+            if seed < 2:
+                experience = 'более 6 лет'
+            elif seed < 5:
+                experience = '3-6 лет'
+            elif seed < 10:
+                experience = '1-3 года'
+            else:
+                experience = 'до 1 года'
             form = choice(['удаленно', 'гибрид', 'офис'])
             description = choice(VACANCIES[career])
             responsibilities = choice(DEALS[career])

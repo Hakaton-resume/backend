@@ -1,17 +1,22 @@
 Хакатон  
+
 Рисовали:
 -
 -
 -
+
 Оживляли интерфейсы:
 -
 -
 -
+
 Отдавали данные с сервера:
 -
 -
+
 Под чутким руководством:
 -
+
 Проект работает https://career-tracker.duckdns.org  
 Swagger https://career-tracker.duckdns.org/swagger/  
 Redoc https://career-tracker.duckdns.org/redoc/  

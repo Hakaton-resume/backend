@@ -246,7 +246,22 @@ class VacancyCreateSerializer(ModelSerializer):
     skills = SkillWeightSerializer(many=True)
 
     class Meta:
-        fields = '__all__'
+        fields = [
+            "tags",
+            "skills",
+            "company_name",
+            "company_info",
+            "location",
+            "pub_date",
+            "name",
+            "experience",
+            "description",
+            "responsibilities",
+            "form",
+            "reject_letter",
+            "additional_info",
+            "is_active"
+        ]
         model = Vacancy
 
     @transaction.atomic
@@ -262,7 +277,7 @@ class VacancyCreateSerializer(ModelSerializer):
                 skill=skill,
                 vacancy=vacancy,
                 weight=weight
-        )  
+        )
 
     @transaction.atomic
     def create(self, validated_data):

@@ -247,7 +247,9 @@ class VacancyCreateSerializer(ModelSerializer):
             "reject_letter",
             "additional_info",
             "is_active",
-            "company"
+            "company",
+            "salary",
+            "currency"
         ]
         model = Vacancy
 

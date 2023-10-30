@@ -238,7 +238,7 @@ class VacancyViewSet(ModelViewSet):
         url_path='favourites/(?P<student_id>\d+)'
     )
     def favourite(self, request, pk=None, student_id=None):
-        vacancy = get_object_or_404(Vacancy, pk=id)
+        vacancy = get_object_or_404(Vacancy, pk=pk)
         student = get_object_or_404(StudentUser, pk=student_id)
         if Favourite.objects.filter(vacancy=vacancy, student=student).exists():
             return Response(
@@ -254,13 +254,12 @@ class VacancyViewSet(ModelViewSet):
         )
         return Response(serializer.data)
 
-
     @action(
         detail=True,
         url_path='students/(?P<student_id>\d+)'
     )
     def student(self, request, pk=None, student_id=None):
-        vacancy = self.get_object()
+        vacancy = get_object_or_404(Vacancy, pk=pk)
         student = get_object_or_404(StudentUser, pk=student_id)
         vacancy_skills = vacancy.skills.all()
         skills_with_weigth = []
@@ -361,7 +360,7 @@ class VacancyViewSet(ModelViewSet):
         return Response(response_data)
 
     def perform_create(self, serializer):
-        serializer.save(company=Company.objects.first())    
+        serializer.save(company=Company.objects.first())
 
     def get_serializer_class(self):
         if self.action == 'response':

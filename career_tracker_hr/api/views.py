@@ -78,11 +78,6 @@ class StudentViewSet(ModelViewSet):
             )
 
 
-class VacancyCreateViewSet(ModelViewSet):
-    queryset = Vacancy.objects.all()
-    serializer_class = VacancySerializer
-
-
 class VacancyViewSet(ModelViewSet):
     queryset = Vacancy.objects.all()
 
@@ -103,11 +98,11 @@ class VacancyViewSet(ModelViewSet):
                     {'errors': 'Студент уже добавлен в избранное'},
                     status=HTTP_400_BAD_REQUEST
                 )
-            Favourite.objects.create(
+            favourite = Favourite.objects.create(
                 vacancy=vacancy, student=student
             )
-            serializer = VacancyFavouriteSerializer(
-                vacancy, context={'request': request}
+            serializer = FavouriteSerializer(
+                favourite, context={'request': request}
             )
             return Response(serializer.data, status=HTTP_201_CREATED)
                 
@@ -175,7 +170,7 @@ class VacancyViewSet(ModelViewSet):
                 {'errors': 'Студент уже приглашен'},
                 status=HTTP_400_BAD_REQUEST
             )
-        Invitation.objects.create(
+        invitation = Invitation.objects.create(
             vacancy=vacancy, student=student
         )
         if Favourite.objects.filter(
@@ -190,8 +185,8 @@ class VacancyViewSet(ModelViewSet):
             Resp.objects.filter(
                 vacancy=vacancy, student=student
             ).delete()
-        serializer = VacancyInvitationSerializer(
-            student, context={'request': request}
+        serializer = InvitationSerializer(
+            invitation, context={'request': request}
         )
         return Response(serializer.data, status=HTTP_201_CREATED)
 
@@ -239,24 +234,26 @@ class VacancyViewSet(ModelViewSet):
 
     @action(
         detail=True,
+        methods=['post'],
         url_path='favourites/(?P<student_id>\d+)'
     )
     def favourite(self, request, pk=None, student_id=None):
-        vacancy = self.get_object()
+        vacancy = get_object_or_404(Vacancy, pk=id)
         student = get_object_or_404(StudentUser, pk=student_id)
         if Favourite.objects.filter(vacancy=vacancy, student=student).exists():
-            favourite = Favourite.objects.filter(
-                vacancy=vacancy, student=student
-            ).first()
-            serializer = FavouriteSerializer(
-                favourite,
-                context={'request': request}
-            )
-            return Response(serializer.data)
-        return Response(
-                {'errors': 'Студента нет в избранном'},
+            return Response(
+                {'errors': 'Студент уже избранном'},
                 status=HTTP_400_BAD_REQUEST
+            )
+        favourite = Favourite.objects.create(
+                vacancy=vacancy, student=student
         )
+        serializer = FavouriteSerializer(
+            favourite,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
 
     @action(
         detail=True,
@@ -328,20 +325,26 @@ class VacancyViewSet(ModelViewSet):
                 skills_similarity,
                 experience_similarity
             )
-            if Favourite.objects.filter(vacancy=vacancy, student=student).exists():
+            if Favourite.objects.filter(
+                vacancy=vacancy, student=student
+            ).exists():
                 is_favourited = True
             else:
                 is_favourited = False
-            if Resp.objects.filter(vacancy=vacancy, student=student).exists():
+            if Resp.objects.filter(
+                vacancy=vacancy, student=student
+            ).exists():
                 is_response = True
             else:
                 is_response = False
-            if Invitation.objects.filter(vacancy=vacancy, student=student).exists():
+            if Invitation.objects.filter(
+                vacancy=vacancy, student=student
+            ).exists():
                 is_invitation = True
             else:
                 is_invitation = False
             serializer = StudentVacancySerializer(
-                student, 
+                student,
                 context={'request': request},
                 data={
                     'similarity': similarity,
@@ -357,10 +360,13 @@ class VacancyViewSet(ModelViewSet):
 
         return Response(response_data)
 
+    def perform_create(self, serializer):
+        serializer.save(company=Company.objects.first())    
+
     def get_serializer_class(self):
         if self.action == 'response':
             return ResponseSerializer
-        elif self.action == ('invitations', 'to_invitation', ''):
+        elif self.action == ('invitations', 'to_invitation'):
             return InvitationSerializer
         elif self.action in ('favourites', 'to_favourite'):
             return FavouriteSerializer

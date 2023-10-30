@@ -284,19 +284,23 @@ class VacancyCreateSerializer(ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        skills = validated_data.pop('skills')
-        tags = validated_data.pop('tags')
+        if 'skills' in validated_data:
+            skills = validated_data.pop('skills')
+            instance.skills.clear()
+            self.weight_skills(skills, instance)
+        #skills = validated_data.pop('skills')
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags')
+            instance.tags.clear()
+            for tag_data in tags: 
+                if Tag.objects.filter(name=tag_data).exists():
+                    tag = Tag.objects.get(name=tag_data) 
+                else: 
+                    tag = Tag.objects.create(name=tag_data)
+                if not instance.tags.filter(name=tag_data).exists():
+                    instance.tags.add(tag)
         instance = super().update(instance, validated_data)
-        instance.skills.clear()
-        self.weight_skills(skills, instance)
-        instance.tags.clear()
-        for tag_data in tags: 
-            if Tag.objects.filter(name=tag_data).exists():
-                tag = Tag.objects.get(name=tag_data) 
-            else: 
-                tag = Tag.objects.create(name=tag_data)
-            if not instance.tags.filter(name=tag_data).exists():
-                instance.tags.add(tag)
+
         instance.save()
         return instance
 

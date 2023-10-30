@@ -10,13 +10,13 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
                                         PrimaryKeyRelatedField, ImageField)
 from django.http import HttpResponse
-
+from rest_framework.pagination import PageNumberPagination
 from career.models import Vacancy, Skill, Tag, Favourite, Invitation, Resp, SkillVacancy
 from users.models import StudentUser, Company
 from api.serializers import (VacancyResponseSerializer, StudentVacancySerializer, InvitationSerializer,
                              SkillSerializer, TagSerializer, ResponseSerializer,
                              VacancyCreateSerializer, StudentSerializer, VacancySerializer,
-                             CompanySerializer, VacancyAllSerializer, FavouriteSerializer,
+                             VacancyAllSerializer, FavouriteSerializer,
                              VacancyFavouriteSerializer, VacancyInvitationSerializer)
 from api.utils import download_file, experience_compаration, skills_compаration, percentage_of_similarity
 from api.filters import SkillFilter, TagFilter
@@ -38,12 +38,6 @@ class SkillViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend, SearchFilter,)
     search_fields = ('^name',)
     filterset_class = SkillFilter
-
-
-class CompanyViewSet(ModelViewSet):
-    queryset = Company.objects.all()
-    serializer_class = CompanySerializer
-    #permission_classes = (IsAdminOrReadOnly,)
 
 
 class StudentViewSet(ModelViewSet):

@@ -1,11 +1,9 @@
 from django.db import models
-from django.core.validators import RegexValidator
-from django.db.models import (CASCADE, CharField, DateTimeField,
-                              IntegerField, ImageField, ForeignKey,
-                              ManyToManyField, Model, SlugField,
-                              TextField, UniqueConstraint, OneToOneField)
+from django.db.models import (CASCADE, CharField,
+                              ForeignKey, Model,
+                              UniqueConstraint)
 
-from users.models import StudentUser, Company, Skill
+from users.models import StudentUser, Skill
 from django.utils import timezone
 
 
@@ -165,7 +163,7 @@ class Resp(Model):
     class Meta:
         verbose_name = 'Отклик'
         verbose_name_plural = 'Отклики'
-    
+
     def __str__(self):
         return f'{self.student.user} откликнулся на {self.vacancy}'
 

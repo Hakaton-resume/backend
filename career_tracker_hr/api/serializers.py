@@ -1,16 +1,20 @@
 import base64
-from rest_framework.serializers import (ModelSerializer, SerializerMethodField, ListField,
+from rest_framework.serializers import (ModelSerializer,
+                                        SerializerMethodField,
+                                        ListField,
                                         ImageField, CharField,
                                         IntegerField, BooleanField)
 from django.core.files.base import ContentFile
-from rest_framework.status import HTTP_400_BAD_REQUEST
-from rest_framework.generics import get_object_or_404
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 
-from api.utils import skills_compаration, experience_compаration, percentage_of_similarity
-from career.models import Favourite, Vacancy, Resp, Tag,  SkillVacancy, Invitation
-from users.models import Company, StudentUser, Skill, StudentsActivities, User
+from api.utils import (skills_compаration,
+                       experience_compаration,
+                       percentage_of_similarity)
+from career.models import (Favourite, Invitation,
+                           Vacancy, Resp, Tag, SkillVacancy)
+from users.models import StudentUser, Skill, StudentsActivities, User
 
 
 class Base64ImageField(ImageField):
@@ -44,7 +48,7 @@ class StudentSerializer(ModelSerializer):
     last_name = SerializerMethodField()
     first_name = SerializerMethodField()
     photo = Base64ImageField()
-    
+
     class Meta:
         model = StudentUser
         fields = '__all__'
@@ -179,6 +183,7 @@ class FavouriteSerializer(BaseGroupSerializer):
     class Meta:
         model = Favourite
         fields = '__all__'
+        ordering = ['-similarity']
 
     def get_is_invitation(self, obj):
         return Invitation.objects.filter(
@@ -188,7 +193,7 @@ class FavouriteSerializer(BaseGroupSerializer):
     def get_is_response(self, obj):
         return Resp.objects.filter(
             vacancy=obj.vacancy, student=obj.student
-        ).exists()    
+        ).exists()
 
 
 class VacancyResponseSerializer(VacancySerializer):
@@ -265,7 +270,7 @@ class VacancyCreateSerializer(ModelSerializer):
                 skill=skill,
                 vacancy=vacancy,
                 weight=weight
-        )
+            )
 
     @transaction.atomic
     def create(self, validated_data):
@@ -288,14 +293,14 @@ class VacancyCreateSerializer(ModelSerializer):
             skills = validated_data.pop('skills')
             instance.skills.clear()
             self.weight_skills(skills, instance)
-        #skills = validated_data.pop('skills')
+        # skills = validated_data.pop('skills')
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             instance.tags.clear()
-            for tag_data in tags: 
+            for tag_data in tags:
                 if Tag.objects.filter(name=tag_data).exists():
-                    tag = Tag.objects.get(name=tag_data) 
-                else: 
+                    tag = Tag.objects.get(name=tag_data)
+                else:
                     tag = Tag.objects.create(name=tag_data)
                 if not instance.tags.filter(name=tag_data).exists():
                     instance.tags.add(tag)
@@ -310,7 +315,7 @@ class VacancyCreateSerializer(ModelSerializer):
         return VacancySerializer(instance,
                                  context=context).data
 
-    #def validate_skills(self, value):
+    # def validate_skills(self, value):
     #    if not value:
     #        raise ValidationError({
     #            'skill': 'Нужно ввести хотя бы один навык'
@@ -323,8 +328,8 @@ class VacancyCreateSerializer(ModelSerializer):
     #                'skill': 'Такой навык уже добавлен'
     #        })
     #        skills.append(skill)
-    #    return value                             
-   
+    #    return value
+
     def validate_tags(self, value):
         if not value:
             raise ValidationError({

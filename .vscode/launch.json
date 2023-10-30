@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/career_tracker_hr/manage.py",
             "args": [
-                "runserver"
+                "filldb"
             ],
             "django": true,
             "justMyCode": true

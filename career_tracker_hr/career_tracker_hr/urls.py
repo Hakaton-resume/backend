@@ -10,6 +10,7 @@ schema_view = get_schema_view(
       default_version='v1',
       description="",
    ),
+   url='https://career-tracker.duckdns.org/api/v1/',
    public=True,
    permission_classes=(permissions.AllowAny,),
 )

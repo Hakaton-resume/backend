@@ -247,7 +247,6 @@ class VacancyCreateSerializer(ModelSerializer):
             "reject_letter",
             "additional_info",
             "is_active",
-            "company",
             "salary",
             "currency"
         ]
@@ -262,7 +261,7 @@ class VacancyCreateSerializer(ModelSerializer):
                 skill = Skill.objects.filter(name=name).first()
             else:
                 skill = Skill.objects.create(name=name)
-            SkillVacancy.objects.create( 
+            SkillVacancy.objects.create(
                 skill=skill,
                 vacancy=vacancy,
                 weight=weight
@@ -307,20 +306,20 @@ class VacancyCreateSerializer(ModelSerializer):
         return VacancySerializer(instance,
                                  context=context).data
 
-    def validate_skills(self, value):
-        if not value:
-            raise ValidationError({
-                'skill': 'Нужно ввести хотя бы один навык'
-            })
-        skills = []
-        for item in value:
-            skill = get_object_or_404(Skill, name=item['name'])
-            if skill in skills:
-                raise ValidationError({
-                    'skill': 'Такой навык уже добавлен'
-            })
-            skills.append(skill)
-        return value                             
+    #def validate_skills(self, value):
+    #    if not value:
+    #        raise ValidationError({
+    #            'skill': 'Нужно ввести хотя бы один навык'
+    #        })
+    #    skills = []
+    #    for item in value:
+    #        skill = get_object_or_404(Skill, name=item['name'])
+    #        if skill in skills:
+    #            raise ValidationError({
+    #                'skill': 'Такой навык уже добавлен'
+    #        })
+    #        skills.append(skill)
+    #    return value                             
    
     def validate_tags(self, value):
         if not value:

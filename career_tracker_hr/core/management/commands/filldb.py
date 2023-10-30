@@ -211,6 +211,7 @@ class Command(base.BaseCommand):
             career = choice(CAREERS)
             name = choice(JOBS[career])
             # experience = choice([0, 6, 12, 24, 36])
+            seed = randint(1, 25)
             if seed < 2:
                 experience = 'более 6 лет'
             elif seed < 5:

@@ -213,20 +213,6 @@ class VacancyAllSerializer(VacancySerializer):
     invitations = InvitationSerializer(many=True, read_only=True)
 
 
-class CompanySerializer(ModelSerializer):
-    """Сериазизатор для компаний"""
-    vacancies = SerializerMethodField()
-
-    class Meta:
-        fields = ('name', 'vacancies')
-        model = Company
-
-    def get_vacancies(self, obj):
-        vacancies = Vacancy.objects.filter(company=obj)
-        serializer = VacancySerializer(vacancies, many=True)
-        return serializer.data
-
-
 class SkillWeightSerializer(ModelSerializer):
     """Сериализатор для навыков с весами в требованиях вакансии"""
     name = CharField()

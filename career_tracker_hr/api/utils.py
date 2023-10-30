@@ -2,6 +2,7 @@ from django.http import HttpResponse
 
 from api.constants import WEIGHT, EXPERIENCE
 
+
 def skills_compаration(vacancy_skills, candidate_skills):
     """Рассчет процента совпадения"""
     vacancy_skills = [(skill[0].name, skill[1]) for skill in vacancy_skills]
@@ -23,18 +24,18 @@ def skills_compаration(vacancy_skills, candidate_skills):
 
 def experience_compаration(vacancy_experience, student_experience):
     """Сравнение требуемого в вакансии опыта и опыта соискателя"""
-   # required_experience = EXPERIENCE[vacancy_experience]
-   # if required_experience[0] <= student_experience <= required_experience[1]:
-   #     return 1
-   # elif required_experience[0] > student_experience:
-   #     return 0
-   # return 0.9
-
-    if vacancy_experience == student_experience:
+    required_experience = EXPERIENCE[vacancy_experience]
+    if required_experience[0] <= int(student_experience) <= required_experience[1]:
         return 1
-    elif vacancy_experience < student_experience:
-        return 0.9
-    return 0
+    elif required_experience[0] > int(student_experience):
+        return 0
+    return 0.9
+
+    #if vacancy_experience == student_experience:
+    #    return 1
+    #elif vacancy_experience < student_experience:
+    #    return 0.9
+    #return 0
 
 
 def percentage_of_similarity(*args):
@@ -44,7 +45,6 @@ def percentage_of_similarity(*args):
         count += 1
         sum_args += arg
     return round(sum_args / count * 100)
-
 
 
 def download_file(content):

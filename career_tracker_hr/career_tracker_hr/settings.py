@@ -71,10 +71,10 @@ WSGI_APPLICATION = 'career_tracker_hr.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('ENGINE', default='django.db.backends.sqlite3'),
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.sqlite3'),
         'NAME': os.getenv('DB_NAME', default='db.sqlite3'),
-        'USER': os.getenv('POSTGRES_USER', default='username'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='password'),
+        'USER': os.getenv('DB_USER', default='username'),
+        'PASSWORD': os.getenv('DB_PASSWORD', default='password'),
         'HOST': os.getenv('DB_HOST', default='localhost'),
         'PORT': os.getenv('DB_PORT', default=5432),
     }

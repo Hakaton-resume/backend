@@ -76,10 +76,14 @@ sudo docker compose exec career_tracker_hr bash -c 'python manage.py filldb'
 ```
 #### Проект доступен по адресу https://career-tracker.duckdns.org  
 
+#### Репозиторий фронтенда https://github.com/Hakaton-resume/resume-front
+
+
 ## Документация
 
 Swagger https://career-tracker.duckdns.org/swagger/  
 Redoc https://career-tracker.duckdns.org/redoc/  
+
 
 
 19 - 31 октября 2023 года

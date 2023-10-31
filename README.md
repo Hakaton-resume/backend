@@ -31,7 +31,7 @@
 - Ламтюгина Александра
 - [Синицкая Анна](https://github.com/Sinitskayaya)
 
-#### Команда fromtend-разработчиков
+#### Команда frontend-разработчиков
 - [Карпов Кирилл](https://github.com/RinVeber)
 - [Лысцов Антон](https://github.com/777toha)
 - Рагойжа Дмитрий

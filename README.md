@@ -59,16 +59,20 @@ DB_PORT=<5432>
 ```
 #### Разверните контейнеры из папки infra и выполните миграции
 ```
-sudo docker-compose up -d --build
-sudo docker-compose exec backend python manage.py migrate
+sudo docker compose up -d --build
+sudo docker compose exec career_tracker_hr bash -c 'python manage.py migrate'
 ```
 #### Создайте суперюзера
 ```
-sudo docker-compose exec backend python manage.py createsuperuser
+sudo docker compose exec career_tracker_hr bash -c 'python manage.py createsuperuser'
 ```
 ####  Cоберите статику
 ```
-sudo docker-compose exec backend python manage.py collectstatic
+sudo docker compose exec career_tracker_hr bash -c 'python manage.py collectstatic --no-input'
+```
+####  Загрузите данные
+```
+sudo docker compose exec career_tracker_hr bash -c 'python manage.py filldb'
 ```
 #### Проект доступен по адресу https://career-tracker.duckdns.org  
 
